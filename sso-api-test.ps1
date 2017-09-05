@@ -7,7 +7,7 @@ $api = "$sso/sso-api"
 $scope = Get-OAuthScopeFromHttpError -Uri "$api/site" -ErrorAction Stop
 $bearer = Get-OAuthAccessToken -Authority "$sso/uas" -Client $client -Scope $scope -Credential (Get-Credential -Message $sso -UserName "system")
 
-Import-Module "C:\Users\jeps\OneDrive\Work\sso-path\sso-api.psd1" -Force -Verbose
+$env:HOME | Join-Path -ChildPath "Documents\WindowsPowerShell\sso-api\sso-api.psd1" | Import-Module -Global -Force 
 
 New-SSOContext -BaseUri $api -Bearer $bearer
 

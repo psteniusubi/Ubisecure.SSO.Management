@@ -1,4 +1,4 @@
-﻿Import-Module -Force -Global -Name "C:\Users\jeps\OneDrive\Work\sso-path\sso-path.psm1"
+﻿$env:HOME | Join-Path -ChildPath "Documents\WindowsPowerShell\sso-api\sso-api.psd1" | Import-Module -Global -Force 
 
 New-ObjectPath -Type "site" 
 New-ObjectPath -Type "site" -Value "System" 
