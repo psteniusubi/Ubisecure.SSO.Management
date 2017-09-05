@@ -21,6 +21,8 @@ FunctionsToExport = @(
     "New-Context",
     "Remove-Context",
 
+    "New-Logon",
+
     "Invoke-Api",
 
     "ConvertTo-Object",
@@ -44,6 +46,7 @@ DefaultCommandPrefix = 'SSO'
 NestedModules = @(
     "Get-CallerPreference.ps1",
     "context.ps1",
+    "logon.ps1",
     "sso-path.ps1",
     "object.ps1",
     "link.ps1",
