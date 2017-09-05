@@ -16,8 +16,8 @@ New-SSOObjectPath -Type "application" "System","Ubilogin" | Join-SSOAttributePat
 New-SSOObjectPath -Type "site" "System" | Get-SSOObject | Get-SSOObject
 
 New-SSOObjectPath -Type "site" "Example" | Set-SSOObject 
-New-SSOObjectPath -Type "site" "Example" | Join-SSOLinkPath -LinkName "sub" | Get-SSOLink -Verbose
-New-SSOObjectPath -Type "site" "Example" | Join-SSOLinkPath -LinkName "sub" | Get-SSOLink | Remove-SSOObject -Verbose
+New-SSOObjectPath -Type "site" "Example" | Join-SSOLinkPath -LinkName "sub" | Get-SSOLink 
+New-SSOObjectPath -Type "site" "Example" | Join-SSOLinkPath -LinkName "sub" | Get-SSOLink | Remove-SSOObject 
 New-SSOObjectPath -Type "site" "Example" | Add-SSOObject -Type "group" -Name "users" 
 
 New-SSOObjectPath -Type "site" | Join-SSOLinkPath -LinkName "sub" | Get-SSOLink | Get-SSOObject 
@@ -37,6 +37,8 @@ Invoke-SSOApi -Method Get (New-SSOObjectPath -Type "application" "System","Ubilo
 
 $policy = New-SSOObjectPath -Type "policy" "SSO API Sample","sso-api-policy" 
 $users = New-SSOObjectPath -Type "group" "SSO API Sample","users"
+
+Join-SSOLinkPath -Path $policy -Link $users | Add-SSOLink -Attributes @{"attributename"="name";"attributevalue"="value1";} -Verbose
 Join-SSOLinkPath -Path $policy -Link $users | Add-SSOLink -Attributes @{"attributename"="name";"attributevalue"="value1";} -Verbose
 
 $policy | Join-SSOLinkPath -LinkType "policyItem" | Get-SSOLink
@@ -44,3 +46,6 @@ $policy | Join-SSOLinkPath -LinkType "policyItem" | Get-SSOLink | Get-SSOObject
 $policy | Join-SSOLinkPath -LinkType "policyItem" | Get-SSOLink | Remove-SSOObject -Verbose
 $policy | Join-SSOLinkPath -LinkType "group" | Get-SSOLink 
 $policy | Join-SSOLinkPath -LinkType "group" | Get-SSOLink | Select-Object -ExpandProperty "Index" | Get-SSOObject 
+
+New-SSOObjectPath -Type "method" "password.1" | Join-SSOLinkPath -LinkType "user" | Get-SSOLink | Get-SSOLink -Verbose
+New-SSOObjectPath -Type "method" "password.1" | Join-SSOLinkPath -LinkType "user" | Get-SSOLink | Get-SSOObject -Verbose

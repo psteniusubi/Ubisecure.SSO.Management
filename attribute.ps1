@@ -1,4 +1,3 @@
-Import-Module -Name ($PSCommandPath | Split-Path -Parent | Join-Path -ChildPath "sso-api.psm1") 
 
 function Get-Attribute {
     [CmdletBinding()]

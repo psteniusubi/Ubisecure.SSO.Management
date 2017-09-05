@@ -4,7 +4,7 @@
 function New-ObjectPath {
     [CmdletBinding()]
     Param(
-        [Parameter()] [ValidatePattern("\w+")] [string] $Type,
+        [Parameter(Mandatory=$true)] [ValidatePattern("\w+")] [string] $Type,
         [Parameter(ValueFromPipeline=$true,Position=0)] [AllowNull()] [string[]] $Value
     )
     Begin {

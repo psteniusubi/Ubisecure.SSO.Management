@@ -1,5 +1,4 @@
 Import-Module -Name "querystring" -Scope Local
-Import-Module -Name ($PSCommandPath | Split-Path -Parent | Join-Path -ChildPath "sso-api.psm1") 
 
 function ConvertTo-Link {
     [CmdletBinding()]
@@ -37,18 +36,18 @@ function ConvertTo-Link {
 function Get-Link {
     [CmdletBinding()]
     Param(
-        [Parameter(Position=0,ValueFromPipeline=$true)] [PSTypeName("Link.Path")] $Link,
+        [Parameter(Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true)] [PSTypeName("Link.Path")] $Reference,
         [Parameter()] [PSTypeName("Context")] $Context = (GetContext)
     )
     Process {
-        $Link | Invoke-Api -Method Get -Context $Context | ConvertTo-Link
+        $Reference | Invoke-Api -Method Get -Context $Context | ConvertTo-Link
     }
 }
 
 function Set-Link {
     [CmdletBinding()]
     Param(
-        [Parameter(Position=0,ValueFromPipeline=$true)] [PSTypeName("Link.Path")] $Link,
+        [Parameter(Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true)] [PSTypeName("Link.Path")] $Reference,
         [parameter()] [switch] $Enabled,
         [parameter()] [hashtable] $Attributes = $null,
         [Parameter()] [PSTypeName("Context")] $Context = (GetContext)
@@ -64,14 +63,14 @@ function Set-Link {
         $local:form = $local:form | ConvertTo-QueryString
     }
     Process {
-        $Link | Invoke-Api -Method Put -Body $local:form -Context $Context | ConvertTo-Link
+        $Reference | Invoke-Api -Method Put -Body $local:form -Context $Context | ConvertTo-Link
     }
 }
 
 function Add-Link {
     [CmdletBinding()]
     Param(
-        [Parameter(Position=0,ValueFromPipeline=$true)] [PSTypeName("Link.Path")] $Link,
+        [Parameter(Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true)] [PSTypeName("Link.Path")] $Reference,
         [parameter()] [switch] $Enabled,
         [parameter()] [hashtable] $Attributes = $null,
         [Parameter()] [PSTypeName("Context")] $Context = (GetContext)
@@ -87,18 +86,18 @@ function Add-Link {
         $local:form = $local:form | ConvertTo-QueryString
     }
     Process {
-        $Link | Invoke-Api -Method Post -Body $local:form -Context $Context | ConvertTo-Link
+        $Reference | Invoke-Api -Method Post -Body $local:form -Context $Context | ConvertTo-Link
     }
 }
 
 function Remove-Link {
     [CmdletBinding()]
     Param(
-        [Parameter(Position=0,ValueFromPipeline=$true)] [PSTypeName("Link.Path")] $Link,
+        [Parameter(Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true)] [PSTypeName("Link.Path")] $Reference,
         [Parameter()] [PSTypeName("Context")] $Context = (GetContext)
     )
     Process {
-        $Link | Invoke-Api -Method Delete -Context $Context 
+        $Reference | Invoke-Api -Method Delete -Context $Context 
     }
 }
 

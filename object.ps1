@@ -1,5 +1,4 @@
 Import-Module -Name "querystring" -Scope Local
-Import-Module -Name ($PSCommandPath | Split-Path -Parent | Join-Path -ChildPath "sso-api.psm1") 
 
 function ConvertTo-Object {
     [CmdletBinding()]
