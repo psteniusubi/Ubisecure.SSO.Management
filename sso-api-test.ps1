@@ -7,38 +7,40 @@ $api = "$sso/sso-api"
 $scope = Get-OAuthScopeFromHttpError -Uri "$api/site" -ErrorAction Stop
 $bearer = Get-OAuthAccessToken -Authority "$sso/uas" -Client $client -Scope $scope -Credential (Get-Credential -Message $sso -UserName "system")
 
-$env:HOME | Join-Path -ChildPath "Documents\WindowsPowerShell\sso-api\sso-api.psd1" | Import-Module -Global -Force 
+$env:HOME | Join-Path -ChildPath "Documents\WindowsPowerShell\sso-api\sso-api.psd1" | Import-Module -Force -Verbose
 
 New-SSOContext -BaseUri $api -Bearer $bearer
 
-New-SSOObjectPath -Type "application" -Path "System","Ubilogin" | Set-SSOAttributePath -Name "metadata" | Get-SSOAttribute -Verbose
+New-SSOObjectPath -Type "application" "System","Ubilogin" | Join-SSOAttributePath -Name "metadata" | Get-SSOAttribute -Verbose
 
-New-SSOObjectPath -Type "site" -Path "System" | Get-SSOObject -Verbose  | Get-SSOObject
+New-SSOObjectPath -Type "site" "System" | Get-SSOObject | Get-SSOObject
 
-New-SSOObjectPath -Type "site" -Path "Example" | Set-SSOObject 
-New-SSOObjectPath -Type "site" -Path "Example" | Set-SSOLinkPath -LinkName "sub" | Get-SSOLink | % { Remove-SSOObject -Path $_.Reference.Link -Verbose }
-New-SSOObjectPath -Type "site" -Path "Example" | Add-SSOObject -Type "group" -Name "users" 
+New-SSOObjectPath -Type "site" "Example" | Set-SSOObject 
+New-SSOObjectPath -Type "site" "Example" | Join-SSOLinkPath -LinkName "sub" | Get-SSOLink -Verbose
+New-SSOObjectPath -Type "site" "Example" | Join-SSOLinkPath -LinkName "sub" | Get-SSOLink | Remove-SSOObject -Verbose
+New-SSOObjectPath -Type "site" "Example" | Add-SSOObject -Type "group" -Name "users" 
 
-New-SSOObjectPath -Type "site" | Set-SSOLinkPath -LinkName "sub" | Get-SSOLink | % { Get-SSOObject -Path $_.Reference.Link }
+New-SSOObjectPath -Type "site" | Join-SSOLinkPath -LinkName "sub" | Get-SSOLink | Get-SSOObject 
 
-Invoke-SSOApi Get (New-SSOObjectPath -Type "site" | Set-SSOLinkPath -LinkName "sub") | ConvertTo-SSOReference
-Invoke-SSOApi Get (New-SSOObjectPath -Type "application" -Path "System","Ubilogin" | Set-SSOLinkPath -LinkType "method") | ConvertTo-SSOReference
+(New-SSOObjectPath -Type "site" | Join-SSOLinkPath -LinkName "sub") | Get-Member
 
-Invoke-SSOApi Get (New-SSOObjectPath -Type "policy" -Path "SSO API Sample","sso-api-policy" | Set-SSOLinkPath -LinkType "group") | ConvertTo-SSOReference
-Invoke-SSOApi Get (New-SSOObjectPath -Type "policy" -Path "SSO API Sample","sso-api-policy" | Set-SSOLinkPath -LinkType "policyItem") | ConvertTo-SSOReference
+Invoke-SSOApi -Method Get (New-SSOObjectPath -Type "site" | Join-SSOLinkPath -LinkName "sub") | ConvertTo-SSOLink
+Invoke-SSOApi -Method Get (New-SSOObjectPath -Type "application" "System","Ubilogin" | Join-SSOLinkPath -LinkType "method") | ConvertTo-SSOLink
 
-Invoke-SSOApi Get (New-SSOObjectPath -Type "site" -Path "System") -Verbose | ConvertTo-SSOObject
-Invoke-SSOApi Get (New-SSOObjectPath -Type "site" -Path "System" | Set-SSOLinkPath -LinkName "sub" -Link (New-SSOObjectPath -Type "group")) -Verbose
+Invoke-SSOApi -Method Get (New-SSOObjectPath -Type "policy" "SSO API Sample","sso-api-policy" | Join-SSOLinkPath -LinkType "group") | ConvertTo-SSOLink
+Invoke-SSOApi -Method Get (New-SSOObjectPath -Type "policy" "SSO API Sample","sso-api-policy" | Join-SSOLinkPath -LinkType "policyItem") | ConvertTo-SSOLink
 
-Invoke-SSOApi Get (New-SSOObjectPath -Type "application" -Path "System","Ubilogin" | Set-SSOAttributePath -Name "metadata") -Verbose
+Invoke-SSOApi -Method Get (New-SSOObjectPath -Type "site" "System") | ConvertTo-SSOObject
+Invoke-SSOApi -Method Get (New-SSOObjectPath -Type "site" "System" | Join-SSOLinkPath -LinkName "sub" -Link (New-SSOObjectPath -Type "group")) -Verbose
 
-$policy = New-SSOObjectPath -Type "policy" -Path "SSO API Sample","sso-api-policy" 
-$users = New-SSOObjectPath -Type "group" -Path "SSO API Sample","users"
-#Set-SSOLinkPath -Path $policy -Link $users | Invoke-SSOApi -Method Post -Body @{"attributename"="name";"attributevalue"="value1";} -Verbose
-Set-SSOLinkPath -Path $policy -Link $users | Add-SSOLink -Attributes @{"attributename"="name";"attributevalue"="value1";} -Verbose
+Invoke-SSOApi -Method Get (New-SSOObjectPath -Type "application" "System","Ubilogin" | Join-SSOAttributePath -Name "metadata") -Verbose
 
-$policy | Set-SSOLinkPath -LinkType "policyItem" | Get-SSOLink
-$policy | Set-SSOLinkPath -LinkType "policyItem" | Get-SSOLink | % { Get-SSOObject -Path $_.Reference.Link }
-$policy | Set-SSOLinkPath -LinkType "policyItem" | Get-SSOLink | % { Remove-SSOObject -Path $_.Reference.Link -Verbose }
-$policy | Set-SSOLinkPath -LinkType "group" | Get-SSOLink 
-$policy | Set-SSOLinkPath -LinkType "group" | Get-SSOLink | % { Get-SSOObject -Path $_.Index }
+$policy = New-SSOObjectPath -Type "policy" "SSO API Sample","sso-api-policy" 
+$users = New-SSOObjectPath -Type "group" "SSO API Sample","users"
+Join-SSOLinkPath -Path $policy -Link $users | Add-SSOLink -Attributes @{"attributename"="name";"attributevalue"="value1";} -Verbose
+
+$policy | Join-SSOLinkPath -LinkType "policyItem" | Get-SSOLink
+$policy | Join-SSOLinkPath -LinkType "policyItem" | Get-SSOLink | Get-SSOObject
+$policy | Join-SSOLinkPath -LinkType "policyItem" | Get-SSOLink | Remove-SSOObject -Verbose
+$policy | Join-SSOLinkPath -LinkType "group" | Get-SSOLink 
+$policy | Join-SSOLinkPath -LinkType "group" | Get-SSOLink | Select-Object -ExpandProperty "Index" | Get-SSOObject 

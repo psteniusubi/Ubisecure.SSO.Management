@@ -1,4 +1,4 @@
-Import-Module -Name ($PSCommandPath | Split-Path -Parent | Join-Path -ChildPath "Get-CallerPreference.psm1") -Global
+Import-Module -Name ($PSCommandPath | Split-Path -Parent | Join-Path -ChildPath "Get-CallerPreference.psm1") 
 
 function New-Context {
     [CmdletBinding()]

@@ -1,6 +1,6 @@
 Import-Module -Name "oauth2" -Scope Local
-Import-Module -Name ($PSCommandPath | Split-Path -Parent | Join-Path -ChildPath "context.psm1") -Global
-Import-Module -Name ($PSCommandPath | Split-Path -Parent | Join-Path -ChildPath "sso-path.psm1") -Global
+Import-Module -Name ($PSCommandPath | Split-Path -Parent | Join-Path -ChildPath "context.psm1") 
+Import-Module -Name ($PSCommandPath | Split-Path -Parent | Join-Path -ChildPath "sso-path.psm1") 
 
 function Invoke-Api {
     [CmdletBinding()]
@@ -66,12 +66,12 @@ Export-ModuleMember @(
 "New-ObjectPath",
 "ConvertFrom-ObjectPath",
 "ConvertTo-ObjectPath",
-"Add-ChildPath",
+"Join-ChildPath",
 
-"Set-LinkPath",
+"Join-LinkPath",
 "ConvertFrom-LinkPath",
 
-"Set-AttributePath",
+"Join-AttributePath",
 "ConvertFrom-AttributePath",
 
 "New-Context",
@@ -85,7 +85,7 @@ Export-ModuleMember @(
 "Add-Object",
 "Remove-Object",
 
-"ConvertTo-Reference",
+"ConvertTo-Link",
 "Get-Link",
 "Set-Link",
 "Add-Link",

@@ -13,7 +13,7 @@ function ConvertTo-Object {
             # object type and id
             $local:out = [PSCustomObject]@{
                 PSTypeName = "SSO.Object"
-                Object = ($_.object.id | ConvertTo-ObjectPath)
+                Id = ($_.object.id | ConvertTo-ObjectPath)
                 Attributes = [PSCustomObject]@{}
             }
             # object attributes

@@ -19,7 +19,7 @@ function ConvertTo-Link {
                 % {
                     $local:out = [PSCustomObject]@{
                         PSTypeName = "SSO.Link"
-                        Reference = (Set-SSOLinkPath -Path $local:o -LinkName $_.link -Link (ConvertTo-ObjectPath $_.id))
+                        Reference = (Join-SSOLinkPath -Path $local:o -LinkName $_.link -Link (ConvertTo-ObjectPath $_.id))
                     }
                     if($_.enabled) { 
                         $local:out | Add-Member -MemberType NoteProperty -Name "Enabled" -Value $_.enabled 
