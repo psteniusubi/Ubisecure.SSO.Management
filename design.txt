@@ -1,0 +1,18 @@
+Path
+Path Link LinkType
+Path Link LinkName LinkType
+Path Link LinkPath
+Path Link LinkName LinkPath
+Path Attribute AttributeName
+
+New-Path -Type string -Path string[]
+Add-Child -Parent Path [-Type string] -Path string[]
+Set-Link -Path Path [-LinkName string] -LinkType string -LinkPath string[]
+Set-Link -Path Path [-LinkName string] -Link Path
+Set-Attribue -Path Path -AttributeName Name
+
+ConvertTo-Path "/site/System"
+ConvertFrom-Path $Path
+
+Type Path(0..N) Link LinkName? LinkType? LinkPath(0..N)
+
