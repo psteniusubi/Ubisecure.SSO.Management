@@ -1,4 +1,4 @@
-﻿$env:HOME | Join-Path -ChildPath "Documents\WindowsPowerShell\sso-api\sso-api.psd1" | Import-Module -Global -Force 
+﻿$env:HOME | Join-Path -ChildPath "Documents\WindowsPowerShell\sso-api-v2\sso-api-v2.psd1" | Import-Module -Force 
 
 New-ObjectPath -Type "site" 
 New-ObjectPath -Type "site" -Value "System" 

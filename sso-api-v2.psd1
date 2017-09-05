@@ -1,5 +1,5 @@
 #
-# Module manifest for module 'sso-api'
+# Module manifest for module 'sso-api-v2'
 #
 
 @{
