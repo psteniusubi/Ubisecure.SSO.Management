@@ -33,6 +33,7 @@ FunctionsToExport = @(
 
     "ConvertTo-Link",
     "Get-Link",
+    "Select-Link",
     "Set-Link",
     "Add-Link",
     "Remove-Link",

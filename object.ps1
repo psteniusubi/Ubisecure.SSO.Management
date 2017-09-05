@@ -33,10 +33,12 @@ function Get-Object {
         [Parameter()] [PSTypeName("Context")] $Context = (GetContext)
     )
     Process {
+        $local:expr = {}
         switch($PSCmdlet.ParameterSetName) {
-            "Id" { $Id | Invoke-Api -Method Get -Context $Context | ConvertTo-Object }
-            "Reference" { $Reference | % { $_.Link } | Invoke-Api -Method Get -Context $Context | ConvertTo-Object }
+            "Id" { $local:expr = { $Id } }
+            "Reference" { $local:expr = { $Reference | Select-Object -ExpandProperty "Link" } }
         }
+        $local:expr.Invoke() | Invoke-Api -Method Get -Context $Context | ConvertTo-Object
     }
 }
 
@@ -60,10 +62,12 @@ function Set-Object {
         $local:form = $local:form | ConvertTo-QueryString
     }
     Process {
+        $local:expr = {}
         switch($PSCmdlet.ParameterSetName) {
-            "Id" { $Id | Invoke-Api -Method Put -Body $local:form -Context $Context | ConvertTo-Object }
-            "Reference" { $Reference | % { $_.Link } | Invoke-Api -Method Put -Body $local:form -Context $Context | ConvertTo-Object }
+            "Id" { $local:expr = { $Id } }
+            "Reference" { $local:expr = { $Reference | Select-Object -ExpandProperty "Link" } }
         }
+        $local:expr.Invoke() | Invoke-Api -Method Put -Body $local:form -Context $Context | ConvertTo-Object 
     }
 }
 
@@ -95,10 +99,12 @@ function Add-Object {
         $local:form = $local:form | ConvertTo-QueryString
     }
     Process {
+        $local:expr = {}
         switch($PSCmdlet.ParameterSetName) {
-            "Id" { $Id | Invoke-Api -Method Post -Body $local:form -Context $Context | ConvertTo-Object }
-            "Reference" { $Reference | % { $_.Link } | Invoke-Api -Method Post -Body $local:form -Context $Context | ConvertTo-Object }
+            "Id" { $local:expr = { $Id } }
+            "Reference" { $local:expr = { $Reference | Select-Object -ExpandProperty "Link" } }
         }
+        $local:expr.Invoke() | Invoke-Api -Method Post -Body $local:form -Context $Context | ConvertTo-Object 
     }
 }
 
@@ -110,10 +116,12 @@ function Remove-Object {
         [Parameter()] [PSTypeName("Context")] $Context = (GetContext)
     )
     Process {
+        $local:expr = {}
         switch($PSCmdlet.ParameterSetName) {
-            "Id" { $Id | Invoke-Api -Method Delete -Context $Context }
-            "Reference" { $Reference | % { $_.Link } | Invoke-Api -Method Delete -Context $Context }
+            "Id" { $local:expr = { $Id } }
+            "Reference" { $local:expr = { $Reference | Select-Object -ExpandProperty "Link" } }
         }
+        $local:expr.Invoke() | Invoke-Api -Method Delete -Context $Context 
     }
 }
 

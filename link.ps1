@@ -18,7 +18,7 @@ function ConvertTo-Link {
                 % {
                     $local:out = [PSCustomObject]@{
                         PSTypeName = "SSO.Link"
-                        Reference = (Join-SSOLinkPath -Path $local:o -LinkName $_.link -Link (ConvertTo-ObjectPath $_.id))
+                        Reference = (Join-LinkPath -Id $local:o -LinkName $_.link -Link (ConvertTo-ObjectPath $_.id))
                     }
                     if($_.enabled) { 
                         $local:out | Add-Member -MemberType NoteProperty -Name "Enabled" -Value $_.enabled 
@@ -36,11 +36,22 @@ function ConvertTo-Link {
 function Get-Link {
     [CmdletBinding()]
     Param(
-        [Parameter(Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true)] [PSTypeName("Link.Path")] $Reference,
+        [Parameter(Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,ParameterSetName="Reference")] [PSTypeName("Link.Path")] $Reference,
+        [Parameter(Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,ParameterSetName="Id")] [PSTypeName("Object.Path")] $Id,
+        [Parameter(ParameterSetName="Id")] [AllowNull()] [string] $LinkName = $null,
+        [Parameter(ParameterSetName="Id")] [AllowNull()] [string] $LinkType = $null,
         [Parameter()] [PSTypeName("Context")] $Context = (GetContext)
     )
     Process {
-        $Reference | Invoke-Api -Method Get -Context $Context | ConvertTo-Link
+        switch($PSCmdlet.ParameterSetName) {
+            "Reference" { $Reference | Invoke-Api -Method Get -Context $Context | ConvertTo-Link }
+            "Id" { 
+                $local:t = @{}
+                if($LinkName) { $local:t["LinkName"] = $LinkName }
+                if($LinkType) { $local:t["LinkType"] = $LinkType }
+                $Id | Join-LinkPath @local:t | Invoke-Api -Method Get -Context $Context | ConvertTo-Link 
+            }
+        }
     }
 }
 
@@ -64,6 +75,23 @@ function Set-Link {
     }
     Process {
         $Reference | Invoke-Api -Method Put -Body $local:form -Context $Context | ConvertTo-Link
+    }
+}
+
+function Select-Link {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Position=0,ValueFromPipeline=$true)] [PSTypeName("SSO.Link")] $InputObject,
+        [Parameter(ParameterSetName="Id")] [switch] $Id,
+        [Parameter(ParameterSetName="Link")] [switch] $Reference,
+        [Parameter(ParameterSetName="Index")] [switch] $Index
+    )
+    Process {
+        $InputObject | % {
+            if($Id) { $_.Reference.Id }
+            elseif($Reference) { $_.Reference.Link }
+            elseif($Index) { $_.Index }
+        }
     }
 }
 

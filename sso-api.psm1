@@ -24,37 +24,15 @@ function Invoke-Api {
         }
     }
     Process {
+        $local:expr = {}
         switch($PSCmdlet.ParameterSetName) {
-            "Object" {
-                $Object | % {
-                    $_ | ConvertFrom-SSOObjectPath | % { "$($Context.BaseUri)$_" } |
-                    % { 
-                        Write-Verbose "$Method $_ Content-Type:$ContentType Body:$Body" 
-                        Invoke-RestMethod -Method $Method -Uri $_ -ContentType $ContentType -Headers $local:h -Body $Body
-                    }
-                }
-                break
-            }
-            "Link" {
-                $Link | % {
-                    $_ | ConvertFrom-SSOLinkPath | % { "$($Context.BaseUri)$_" } |
-                    % { 
-                        Write-Verbose "$Method $_ Content-Type:$ContentType Body:$Body" 
-                        Invoke-RestMethod -Method $Method -Uri $_ -ContentType $ContentType -Headers $local:h -Body $Body
-                    }
-                }
-                break
-            }
-            "Attribute" {
-                $Attribute | % {
-                    $_ | ConvertFrom-SSOAttributePath | % { "$($Context.BaseUri)$_" } |
-                    % { 
-                        Write-Verbose "$Method $_ Content-Type:$ContentType Body:$Body" 
-                        Invoke-RestMethod -Method $Method -Uri $_ -ContentType $ContentType -Headers $local:h -Body $Body
-                    }
-                }
-                break
-            }
+            "Object" { $local:expr = { $Object | ConvertFrom-SSOObjectPath } }
+            "Link" { $local:expr = { $Link | ConvertFrom-SSOLinkPath } }
+            "Attribute" { $local:expr = { $Attribute | ConvertFrom-SSOAttributePath } }
+        }
+        $local:expr.Invoke() | % { "$($Context.BaseUri)$_" } | % {
+            Write-Verbose "$Method $_ Content-Type:$ContentType Body:$Body" 
+            Invoke-RestMethod -Method $Method -Uri $_ -ContentType $ContentType -Headers $local:h -Body $Body
         }
     }
 }

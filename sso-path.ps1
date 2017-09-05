@@ -123,15 +123,15 @@ function ConvertTo-ObjectPath {
 function Join-ChildPath {
     [CmdletBinding()]
     Param(
-        [Parameter(ValueFromPipeline=$true)] [PSTypeName("Object.Path")] $Path,
+        [Parameter(ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true)] [PSTypeName("Object.Path")] $Id,
         [Parameter()] [AllowNull()] [ValidatePattern("\w+")] [string] $Type = $null,
         [Parameter(Position=0)] [string[]] $Value
     )
     Process {
-        $Path | % {
+        $Id | % {
             $local:t = $Type
             if(-not $local:t) {
-                $local:t = $Path.Type
+                $local:t = $_.Type
             }
             New-ObjectPath -Type $local:t -Value ($_.Id + $Value)
         }
@@ -144,7 +144,7 @@ function Join-ChildPath {
 function Join-LinkPath {
     [CmdletBinding(DefaultParameterSetName="LinkType")]
     Param(
-        [Parameter(ValueFromPipeline=$true)] [PSTypeName("Object.Path")] $Path,
+        [Parameter(ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true)] [PSTypeName("Object.Path")] $Id,
         [Parameter()] [AllowNull()] [ValidatePattern("\w+")] [string] $LinkName = $null,
         [Parameter(ParameterSetName="LinkType")] [AllowNull()] [ValidatePattern("\w+")] [string] $LinkType = $null,
         [Parameter(Position=0,ParameterSetName="Link")] [PSTypeName("Object.Path")] $Link
@@ -153,7 +153,7 @@ function Join-LinkPath {
         #
     }
     Process {
-        $Path | % {
+        $Id | % {
             if((-not $Link) -and $LinkType) {
                 $Link = New-ObjectPath -Type $LinkType
             }
@@ -207,17 +207,17 @@ function ConvertFrom-LinkPath {
 function Join-AttributePath {
     [CmdletBinding()]
     Param(
-        [Parameter(ValueFromPipeline=$true)] [PSTypeName("Object.Path")] $Path,
+        [Parameter(ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true)] [PSTypeName("Object.Path")] $Id,
         [Parameter(Position=0)] [ValidatePattern("\w+")] [string] $Name
     )
     Begin {
         #
     }
     Process {
-        $Path | % {
+        $Id | % {
             [pscustomobject]@{
                 PSTypeName="Attribute.Path"
-                Id=$Path
+                Id=$_
                 Name=$Name
             } |
             Add-Member -MemberType ScriptMethod -Name "ToString" -Value { ConvertFrom-AttributePath $this } -Force -PassThru 

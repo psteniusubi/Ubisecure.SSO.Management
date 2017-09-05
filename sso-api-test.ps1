@@ -1,15 +1,8 @@
 ﻿Import-Module "oauth2" 
+Import-Module "sso-api-v2" -Force
 
-$sso = "https://sso.example.com:8443"
-$client = New-OAuthClientConfig -Path "C:\Projects\sso5\testing\trunk\build\ubilogin-sso\ubilogin\webapps\sso-api\WEB-INF\oauth2\client.json"
-
-$api = "$sso/sso-api"
-$scope = Get-OAuthScopeFromHttpError -Uri "$api/site" -ErrorAction Stop
-$bearer = Get-OAuthAccessToken -Authority "$sso/uas" -Client $client -Scope $scope -Credential (Get-Credential -Message $sso -UserName "system")
-
-$env:HOME | Join-Path -ChildPath "Documents\WindowsPowerShell\sso-api-v2\sso-api-v2.psd1" | Import-Module -Force 
-
-New-SSOContext -BaseUri $api -Bearer $bearer
+New-OAuthClientConfig -Path "C:\Projects\sso5\testing\trunk\build\ubilogin-sso\ubilogin\webapps\sso-api\WEB-INF\oauth2\client.json" |
+    New-SSOLogon -Uri "https://sso.example.com:8443" -Credential (Get-Credential -Message "sso-api" -UserName "system")
 
 New-SSOObjectPath -Type "application" "System","Ubilogin" | Join-SSOAttributePath -Name "metadata" | Get-SSOAttribute -Verbose
 
@@ -38,8 +31,8 @@ Invoke-SSOApi -Method Get (New-SSOObjectPath -Type "application" "System","Ubilo
 $policy = New-SSOObjectPath -Type "policy" "SSO API Sample","sso-api-policy" 
 $users = New-SSOObjectPath -Type "group" "SSO API Sample","users"
 
-Join-SSOLinkPath -Path $policy -Link $users | Add-SSOLink -Attributes @{"attributename"="name";"attributevalue"="value1";} -Verbose
-Join-SSOLinkPath -Path $policy -Link $users | Add-SSOLink -Attributes @{"attributename"="name";"attributevalue"="value1";} -Verbose
+$policy | Join-SSOLinkPath -Link $users | Add-SSOLink -Attributes @{"attributename"="name";"attributevalue"="value1";} -Verbose
+$policy | Join-SSOLinkPath -Link $users | Add-SSOLink -Attributes @{"attributename"="name";"attributevalue"="value1";} -Verbose
 
 $policy | Join-SSOLinkPath -LinkType "policyItem" | Get-SSOLink
 $policy | Join-SSOLinkPath -LinkType "policyItem" | Get-SSOLink | Get-SSOObject
