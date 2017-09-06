@@ -67,6 +67,7 @@ function Invoke-Api {
         [Parameter()] [hashtable] $Headers = $null,
         [Parameter()] [AllowNull()] [string] $ContentType = "application/x-www-form-urlencoded",
         [Parameter()] [AllowNull()] [string] $Accept = $null,
+        [Parameter()] [AllowNull()] [hashtable] $Query = $null,
         [Parameter()] [AllowNull()] [object] $Body = $null,
         [Parameter()] [PSTypeName("Context")] $Context = (GetContext)
     )
@@ -79,12 +80,21 @@ function Invoke-Api {
         if($Headers) {
             $local:h += $Headers
         }
+        $local:q = $null
+        if($Query -and ($Query.Count -gt 0)) {
+            $local:q = New-QueryString | Add-QueryString -Values $Query | ConvertTo-QueryString
+        }
     }
     Process {
         $InputObject | % { "$($Context.BaseUri)$($_.ToString())" } | % {
-            Write-Verbose "$Method $_ Content-Type:$ContentType Body:$Body" 
-            if(($Method -eq "Get") -or $PSCmdlet.ShouldProcess($_, $Method)) {
-                Invoke-RestMethod -Method $Method -Uri $_ -ContentType $ContentType -Headers $local:h -Body $Body
+            $local:u = $_
+            if($local:q) {
+                $local:u += "?"
+                $local:u += $local:q
+            }
+            Write-Verbose "$Method $($local:u) Content-Type:$ContentType Body:$Body" 
+            if(($Method -eq "Get") -or $PSCmdlet.ShouldProcess($local:u, $Method)) {
+                Invoke-RestMethod -Method $Method -Uri $local:u -ContentType $ContentType -Headers $local:h -Body $Body
             }
         }
     }
