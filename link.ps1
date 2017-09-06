@@ -69,7 +69,7 @@ function Select-Link {
 }
 
 function Set-Link {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess=$true)]
     Param(
         [Parameter(ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
         [Parameter()] [AllowNull()] [string] $LinkName = $null,
@@ -88,7 +88,7 @@ function Set-Link {
 }
 
 function Add-Link {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess=$true)]
     Param(
         [Parameter(ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
         [Parameter()] [AllowNull()] [string] $LinkName = $null,
@@ -107,7 +107,7 @@ function Add-Link {
 }
 
 function Remove-Link {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess=$true)]
     Param(
         [Parameter(ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
         [Parameter()] [AllowNull()] [string] $LinkName = $null,

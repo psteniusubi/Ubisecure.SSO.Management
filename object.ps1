@@ -47,7 +47,7 @@ function Get-Object {
 }
 
 function Set-Object {
-    [CmdletBinding(DefaultParameterSetName="InputObject")]
+    [CmdletBinding(SupportsShouldProcess=$true,DefaultParameterSetName="InputObject")]
     Param(
         [Parameter(ParameterSetName="InputObject",Position=0,ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
         [Parameter(ParameterSetName="TypeValue")] [ValidatePattern("\w+")] [string] $Type,
@@ -69,7 +69,7 @@ function Set-Object {
 }
 
 function Add-Object {
-    [CmdletBinding(DefaultParameterSetName="InputObject")]
+    [CmdletBinding(SupportsShouldProcess=$true,DefaultParameterSetName="InputObject")]
     Param(
         [Parameter(ParameterSetName="InputObject",Position=0,ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
         [Parameter(ParameterSetName="TypeValue")] [ValidatePattern("\w+")] [string] $Type,
@@ -93,7 +93,7 @@ function Add-Object {
 }
 
 function Remove-Object {
-    [CmdletBinding(DefaultParameterSetName="InputObject")]
+    [CmdletBinding(SupportsShouldProcess=$true,DefaultParameterSetName="InputObject")]
     Param(
         [Parameter(ParameterSetName="InputObject",Position=0,ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
         [Parameter(ParameterSetName="TypeValue")] [ValidatePattern("\w+")] [string] $Type,

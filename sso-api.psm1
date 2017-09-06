@@ -60,7 +60,7 @@ function Copy-Map {
 }
 
 function Invoke-Api {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess=$true)]
     Param(
         [Parameter()] [Microsoft.PowerShell.Commands.WebRequestMethod] $Method = [Microsoft.PowerShell.Commands.WebRequestMethod]::Get,
         [Parameter(Position=0,ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
@@ -83,7 +83,9 @@ function Invoke-Api {
     Process {
         $InputObject | % { "$($Context.BaseUri)$($_.ToString())" } | % {
             Write-Verbose "$Method $_ Content-Type:$ContentType Body:$Body" 
-            Invoke-RestMethod -Method $Method -Uri $_ -ContentType $ContentType -Headers $local:h -Body $Body
+            if(($Method -eq "Get") -or $PSCmdlet.ShouldProcess($_, $Method)) {
+                Invoke-RestMethod -Method $Method -Uri $_ -ContentType $ContentType -Headers $local:h -Body $Body
+            }
         }
     }
 }

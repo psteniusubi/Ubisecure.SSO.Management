@@ -15,7 +15,7 @@ function Get-Child {
 }
 
 function Set-Child {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess=$true)]
     Param(
         [Parameter(ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
         [Parameter()] [AllowNull()] [ValidatePattern("\w+")] [string] $ChildType = $null,
@@ -31,34 +31,8 @@ function Set-Child {
     }
 }
 
-<#
-function Add-Object {
-    [CmdletBinding()]
-    Param(
-        [Parameter(ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
-        [Parameter()] [AllowNull()] [ValidatePattern("\w+")] [string] $ChildType = $null,
-        [Parameter(Position=0)] [string[]] $ChildValue,
-        [parameter()] [switch] $Enabled,
-        [parameter()] [AllowNull()] [string] $ChildType = $null,
-        [parameter()] [AllowNull()] [string] $ChildName = $null,
-        [parameter()] [hashtable] $Attributes = $null,
-        [Parameter()] [PSTypeName("Context")] $Context = (GetContext)
-    )
-    Begin {
-        if($PSCmdlet.ParameterSetName -eq "InputObject") {
-            $local:x = { $InputObject }
-        } else {
-            $local:x = { New-ObjectPath -Type $Type -Value $Value }
-        }
-    }
-    Process {
-        $InputObject | Select-ChildPath $PSBoundParameters | Invoke-Api -Method Post -Body (ConvertTo-Form $PSBoundParameters -Child) -Context $Context | ConvertTo-Object 
-    }
-}
-#>
-
 function Remove-Child {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess=$true)]
     Param(
         [Parameter(ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
         [Parameter()] [AllowNull()] [ValidatePattern("\w+")] [string] $ChildType = $null,

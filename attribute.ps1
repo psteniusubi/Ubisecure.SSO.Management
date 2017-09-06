@@ -14,7 +14,7 @@ function Get-Attribute {
 }
 
 function Set-Attribute {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess=$true)]
     Param(
         [Parameter(ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
         [Parameter(Position=0)] [AllowNull()] [string] $Name = $null,
@@ -29,7 +29,7 @@ function Set-Attribute {
 }
 
 function Add-Attribute {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess=$true)]
     Param(
         [Parameter(ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
         [Parameter(Position=0)] [AllowNull()] [string] $Name = $null,
@@ -44,7 +44,7 @@ function Add-Attribute {
 }
 
 function Remove-Attribute {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess=$true)]
     Param(
         [Parameter(ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
         [Parameter(Position=0)] [AllowNull()] [string] $Name = $null,
