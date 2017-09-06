@@ -1,4 +1,3 @@
-Import-Module -Name "querystring" -Scope Local
 
 function ConvertTo-Object {
     [CmdletBinding()]
@@ -10,118 +9,106 @@ function ConvertTo-Object {
         ? { $_.object -and $_.object.type -and $_.object.id } |
         % {
             # object type and id
-            $local:out = [PSCustomObject]@{
-                PSTypeName = "SSO.Object"
-                Id = ($_.object.id | ConvertTo-ObjectPath)
-                Attributes = [PSCustomObject]@{}
-            }
+            $local:out = $_.object.id | ConvertTo-ObjectPath
+            $local:out.PSObject.TypeNames.Insert(0, "SSO.Object")
             # object attributes
+            $local:a = @{}
             $_.object.attribute | ? { $_.name } | 
             % {
-                $local:out.Attributes | Add-Member -MemberType NoteProperty -Name $_.name -Value $_.value
+                $local:v = @()
+                $_.value | % { $local:v += $_ }
+                $local:a[$_.name] = $local:v
             }
+            $local:out = $local:out | Add-Member -MemberType NoteProperty -Name "Attributes" -Value $local:a -PassThru 
+            $local:out = $local:out | Add-Member -MemberType MemberSet -Name "PSStandardMembers" -Value (NewDefaultDisplayPropertySet "Value","Attributes") -Force -PassThru 
             $local:out
         }
     }
 }
 
 function Get-Object {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName="InputObject")]
     Param(
-        [Parameter(ParameterSetName="Id",Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true)] [PSTypeName("Object.Path")] $Id,
-        [Parameter(ParameterSetName="Reference",Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true)] [PSTypeName("Link.Path")] $Reference,
+        [Parameter(ParameterSetName="InputObject",Position=0,ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
+        [Parameter(ParameterSetName="TypeValue")] [ValidatePattern("\w+")] [string] $Type,
+        [Parameter(ParameterSetName="TypeValue",Position=0,ValueFromPipeline=$true)] [AllowNull()] [string[]] $Value,
         [Parameter()] [PSTypeName("Context")] $Context = (GetContext)
     )
-    Process {
-        $local:expr = {}
-        switch($PSCmdlet.ParameterSetName) {
-            "Id" { $local:expr = { $Id } }
-            "Reference" { $local:expr = { $Reference | Select-Object -ExpandProperty "Link" } }
+    Begin {
+        if($PSCmdlet.ParameterSetName -eq "InputObject") {
+            $local:x = { $InputObject }
+        } else {
+            $local:x = { New-ObjectPath -Type $Type -Value $Value }
         }
-        $local:expr.Invoke() | Invoke-Api -Method Get -Context $Context | ConvertTo-Object
+    }
+    Process {
+        & $local:x | Invoke-Api -Method Get -Context $Context | ConvertTo-Object
     }
 }
 
 function Set-Object {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName="InputObject")]
     Param(
-        [Parameter(ParameterSetName="Id",Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true)] [PSTypeName("Object.Path")] $Id,
-        [Parameter(ParameterSetName="Reference",Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true)] [PSTypeName("Link.Path")] $Reference,
+        [Parameter(ParameterSetName="InputObject",Position=0,ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
+        [Parameter(ParameterSetName="TypeValue")] [ValidatePattern("\w+")] [string] $Type,
+        [Parameter(ParameterSetName="TypeValue",Position=0,ValueFromPipeline=$true)] [AllowNull()] [string[]] $Value,
         [parameter()] [switch] $Enabled,
         [parameter()] [hashtable] $Attributes = $null,
         [Parameter()] [PSTypeName("Context")] $Context = (GetContext)
     )
     Begin {
-        $local:form = New-QueryString
-        if($Enabled) {
-            $local:form = $local:form | Add-QueryString "enabled" "true"
+        if($PSCmdlet.ParameterSetName -eq "InputObject") {
+            $local:x = { $InputObject }
+        } else {
+            $local:x = { New-ObjectPath -Type $Type -Value $Value }
         }
-        if($Attributes) {
-            $local:form = $local:form | Add-QueryString -Values $Attributes
-        }
-        $local:form = $local:form | ConvertTo-QueryString
     }
     Process {
-        $local:expr = {}
-        switch($PSCmdlet.ParameterSetName) {
-            "Id" { $local:expr = { $Id } }
-            "Reference" { $local:expr = { $Reference | Select-Object -ExpandProperty "Link" } }
-        }
-        $local:expr.Invoke() | Invoke-Api -Method Put -Body $local:form -Context $Context | ConvertTo-Object 
+        & $local:x | Invoke-Api -Method Put -Body (ConvertTo-Form $PSBoundParameters) -Context $Context | ConvertTo-Object 
     }
 }
 
 function Add-Object {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName="InputObject")]
     Param(
-        [Parameter(ParameterSetName="Id",Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true)] [PSTypeName("Object.Path")] $Id,
-        [Parameter(ParameterSetName="Reference",Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true)] [PSTypeName("Link.Path")] $Reference,
+        [Parameter(ParameterSetName="InputObject",Position=0,ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
+        [Parameter(ParameterSetName="TypeValue")] [ValidatePattern("\w+")] [string] $Type,
+        [Parameter(ParameterSetName="TypeValue",Position=0,ValueFromPipeline=$true)] [AllowNull()] [string[]] $Value,
         [parameter()] [switch] $Enabled,
-        [parameter()] [AllowNull()] [string] $Type = $null,
-        [parameter()] [AllowNull()] [string] $Name = $null,
+        [parameter()] [AllowNull()] [string] $ChildType = $null,
+        [parameter()] [AllowNull()] [string] $ChildName = $null,
         [parameter()] [hashtable] $Attributes = $null,
         [Parameter()] [PSTypeName("Context")] $Context = (GetContext)
     )
     Begin {
-        $local:form = New-QueryString
-        if($Enabled) {
-            $local:form = $local:form | Add-QueryString "enabled" "true"
+        if($PSCmdlet.ParameterSetName -eq "InputObject") {
+            $local:x = { $InputObject }
+        } else {
+            $local:x = { New-ObjectPath -Type $Type -Value $Value }
         }
-        if($Type) {
-            $local:form = $local:form | Add-QueryString "type" $Type
-        }
-        if($Name) {
-            $local:form = $local:form | Add-QueryString "name" $Name
-        }
-        if($Attributes) {
-            $local:form = $local:form | Add-QueryString -Values $Attributes
-        }
-        $local:form = $local:form | ConvertTo-QueryString
     }
     Process {
-        $local:expr = {}
-        switch($PSCmdlet.ParameterSetName) {
-            "Id" { $local:expr = { $Id } }
-            "Reference" { $local:expr = { $Reference | Select-Object -ExpandProperty "Link" } }
-        }
-        $local:expr.Invoke() | Invoke-Api -Method Post -Body $local:form -Context $Context | ConvertTo-Object 
+        & $local:x | Invoke-Api -Method Post -Body (ConvertTo-Form $PSBoundParameters -Child) -Context $Context | ConvertTo-Object 
     }
 }
 
 function Remove-Object {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName="InputObject")]
     Param(
-        [Parameter(ParameterSetName="Id",Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true)] [PSTypeName("Object.Path")] $Id,
-        [Parameter(ParameterSetName="Reference",Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true)] [PSTypeName("Link.Path")] $Reference,
+        [Parameter(ParameterSetName="InputObject",Position=0,ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
+        [Parameter(ParameterSetName="TypeValue")] [ValidatePattern("\w+")] [string] $Type,
+        [Parameter(ParameterSetName="TypeValue",Position=0,ValueFromPipeline=$true)] [AllowNull()] [string[]] $Value,
         [Parameter()] [PSTypeName("Context")] $Context = (GetContext)
     )
-    Process {
-        $local:expr = {}
-        switch($PSCmdlet.ParameterSetName) {
-            "Id" { $local:expr = { $Id } }
-            "Reference" { $local:expr = { $Reference | Select-Object -ExpandProperty "Link" } }
+    Begin {
+        if($PSCmdlet.ParameterSetName -eq "InputObject") {
+            $local:x = { $InputObject }
+        } else {
+            $local:x = { New-ObjectPath -Type $Type -Value $Value }
         }
-        $local:expr.Invoke() | Invoke-Api -Method Delete -Context $Context 
+    }
+    Process {
+        & $local:x | Invoke-Api -Method Delete -Context $Context 
     }
 }
 

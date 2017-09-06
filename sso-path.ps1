@@ -1,35 +1,44 @@
+function NewDefaultDisplayPropertySet {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Position=0,Mandatory=$true)] [string[]] $Names       
+    )
+    $local:ddps = [System.Management.Automation.PSPropertySet]::new("DefaultDisplayPropertySet", $Names)
+    [System.Management.Automation.PSMemberInfo[]]$ddps
+}
+
 <#
 .SYNOPSIS Create new Path object from type and segments
 #>
 function New-ObjectPath {
     [CmdletBinding()]
     Param(
-        [Parameter(Mandatory=$true)] [ValidatePattern("\w+")] [string] $Type,
-        [Parameter(ValueFromPipeline=$true,Position=0)] [AllowNull()] [string[]] $Value
+        [Parameter()] [ValidatePattern("\w+")] [string] $Type,
+        [Parameter(Position=0,ValueFromPipeline=$true)] [AllowNull()] [string[]] $Value
     )
     Begin {
-        $local:ddps = [System.Management.Automation.PSPropertySet]::new("DefaultDisplayPropertySet", [string[]]@("Type","Value"))
         $local:v = @()
     }
     Process {
         $Value | ? { $_ -ne "" } | % { $local:v += $_ }
     }
     End {
-        [pscustomobject]@{
-            PSTypeName="Object.Path"
+        $local:out = [pscustomobject]@{
+            PSTypeName="SSO.ObjectPath"
             Type=$Type
             Id=[string[]]$local:v
-        } |
-        Add-Member -MemberType ScriptMethod -Name "ToString" -Value { ConvertFrom-ObjectPath $this } -Force -PassThru |
-        Add-Member -MemberType ScriptProperty -Name "Value" -Value { $this.ToString() } -Force -PassThru |
-        Add-Member -MemberType MemberSet -Name "PSStandardMembers" -Value ([System.Management.Automation.PSMemberInfo[]]$ddps) -Force -PassThru 
+        } 
+        $local:out = $local:out | Add-Member -MemberType ScriptMethod -Name "ToString" -Value { ConvertFrom-ObjectPath $this } -Force -PassThru 
+        $local:out = $local:out | Add-Member -MemberType ScriptProperty -Name "Value" -Value { $this.ToString() } -Force -PassThru 
+        $local:out = $local:out | Add-Member -MemberType MemberSet -Name "PSStandardMembers" -Value (NewDefaultDisplayPropertySet "Value") -Force -PassThru 
+        $local:out
     }
 }
 
 function PathEncode {
     [CmdletBinding()]
     Param(
-        [Parameter(Position=0)] [string] $InputObject
+        [Parameter(Position=0,ValueFromPipeline=$true)] [string] $InputObject
     )
     Begin {
         Add-Type -AssemblyNam "System.Web"
@@ -50,7 +59,7 @@ function PathEncode {
 function PathDecode {
     [CmdletBinding()]
     Param(
-        [Parameter(Position=0)] [string] $InputObject
+        [Parameter(Position=0,ValueFromPipeline=$true)] [string] $InputObject
     )
     Begin {
         Add-Type -AssemblyNam "System.Web"
@@ -76,7 +85,7 @@ function PathDecode {
 function ConvertFrom-ObjectPath {
     [CmdletBinding()]
     Param(
-        [Parameter(ValueFromPipeline=$true,Position=0)] [PSTypeName("Object.Path")] $InputObject
+        [Parameter(ValueFromPipeline=$true,Position=0)] [PSTypeName("SSO.ObjectPath")] $InputObject
     )
     Process {
         $InputObject | % {
@@ -123,18 +132,46 @@ function ConvertTo-ObjectPath {
 function Join-ChildPath {
     [CmdletBinding()]
     Param(
-        [Parameter(ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true)] [PSTypeName("Object.Path")] $Id,
-        [Parameter()] [AllowNull()] [ValidatePattern("\w+")] [string] $Type = $null,
-        [Parameter(Position=0)] [string[]] $Value
+        [Parameter(ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
+        [Parameter()] [AllowNull()] [ValidatePattern("\w+")] [string] $ChildType = $null,
+        [Parameter(Position=0)] [string[]] $ChildValue
     )
     Process {
-        $Id | % {
-            $local:t = $Type
+        $InputObject | % {
+            $local:t = $ChildType
             if(-not $local:t) {
                 $local:t = $_.Type
             }
-            New-ObjectPath -Type $local:t -Value ($_.Id + $Value)
+            New-ObjectPath -Type $local:t -Value ($_.Id + $ChildValue)
         }
+    }
+}
+
+<#
+.SYNOPSIS Select SSO.ObjectPath objects from input pipeline
+#>
+function Select-ChildPath {
+    [CmdletBinding()]
+    Param(
+        [Parameter(ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
+        [Parameter(Position=0,ParameterSetName="Map")] [AllowNull()] [hashtable] $Map,
+        [Parameter(ParameterSetName="Child")] [AllowNull()] [string] $ChildType = $null,
+        [Parameter(ParameterSetName="Child")] [AllowNull()] [string[]] $ChildValue = $null
+    )
+    Begin {
+        if($PSCmdlet.ParameterSetName -eq "Map") {
+            $local:parameters = Copy-Map -Map $Map -Keys "ChildType","ChildValue"
+        } else {
+            $local:parameters = Copy-Map -Map $PSBoundParameters -Keys "ChildType","ChildValue"
+        }
+        if($local:parameters.Count -gt 0) {
+            $local:mapper = { $_ | Join-ChildPath @parameters }
+        } else {
+            $local:mapper = { $_ }
+        }
+    }
+    Process {
+        $InputObject | & $local:mapper | ? { $_.PSObject.TypeNames -contains "SSO.ObjectPath" }
     }
 }
 
@@ -144,19 +181,24 @@ function Join-ChildPath {
 function Join-LinkPath {
     [CmdletBinding(DefaultParameterSetName="LinkType")]
     Param(
-        [Parameter(ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true)] [PSTypeName("Object.Path")] $Id,
+        [Parameter(ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
         [Parameter()] [AllowNull()] [ValidatePattern("\w+")] [string] $LinkName = $null,
-        [Parameter(ParameterSetName="LinkType")] [AllowNull()] [ValidatePattern("\w+")] [string] $LinkType = $null,
-        [Parameter(Position=0,ParameterSetName="Link")] [PSTypeName("Object.Path")] $Link
+        [Parameter(ParameterSetName="LinkType")] [ValidatePattern("\w+")] [string] $LinkType,
+        [Parameter(Position=0,ParameterSetName="LinkType")] [AllowNull()] [string[]] $LinkValue = $null,
+        [Parameter(Position=0,ParameterSetName="Link")] [PSTypeName("SSO.ObjectPath")] $Link = $null
     )
     Begin {
-        #
+        Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
+        if($PSCmdlet.ParameterSetName -eq "LinkType") {
+            if($LinkType) {
+                $Link = New-ObjectPath -Type $LinkType -Value $LinkValue
+            } else {
+                $Link = $null
+            }
+        }
     }
     Process {
-        $Id | % {
-            if((-not $Link) -and $LinkType) {
-                $Link = New-ObjectPath -Type $LinkType
-            }
+        $InputObject | % {
             $local:n = $null
             if($LinkName) {
                 if(-not $Link) {
@@ -165,13 +207,13 @@ function Join-LinkPath {
                     $local:n = $LinkName
                 }
             }
-            [pscustomobject]@{
-                PSTypeName="Link.Path"
-                Id=$_
-                LinkName=$local:n
-                Link=$Link
-            } |
-            Add-Member -MemberType ScriptMethod -Name "ToString" -Value { ConvertFrom-LinkPath $this } -Force -PassThru 
+            $local:out = New-ObjectPath -Type $_.Type -Value $_.Id
+            $local:out.PSObject.TypeNames.Insert(0, "SSO.LinkPath")
+            $local:out = $local:out | Add-Member -MemberType NoteProperty -Name "LinkName" -Value $local:n -PassThru 
+            $local:out = $local:out | Add-Member -MemberType NoteProperty -Name "Link" -Value $Link -PassThru 
+            $local:out = $local:out | Add-Member -MemberType ScriptMethod -Name "ToString" -Value { ConvertFrom-LinkPath $this } -Force -PassThru 
+            Write-Verbose "Join-LinkPath return:$($local:out)"
+            $local:out
         }
     }
 }
@@ -182,11 +224,11 @@ function Join-LinkPath {
 function ConvertFrom-LinkPath {
     [CmdletBinding()]
     Param(
-        [Parameter(ValueFromPipeline=$true,Position=0)] [PSTypeName("Link.Path")] $InputObject
+        [Parameter(ValueFromPipeline=$true,Position=0)] [PSTypeName("SSO.LinkPath")] $InputObject
     )
     Process {
         $InputObject | % {
-            $local:out = $_.Id.ToString()
+            $local:out = $_ | ConvertFrom-ObjectPath
             $local:out += "/`$link"
             if($_.LinkName) {
                 if($_.LinkName -ne $_.Link.Type) {
@@ -202,25 +244,55 @@ function ConvertFrom-LinkPath {
 }
 
 <#
+.SYNOPSIS Select SSO.LinkPath objects from input pipeline
+#>
+function Select-LinkPath {
+    [CmdletBinding()]
+    Param(
+        [Parameter(ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
+        [Parameter(Position=0,ParameterSetName="Map")] [AllowNull()] [hashtable] $Map,
+        [Parameter(ParameterSetName="Link")] [AllowNull()] [string] $LinkName = $null,
+        [Parameter(ParameterSetName="Link")] [AllowNull()] [string] $LinkType = $null,
+        [Parameter(ParameterSetName="Link")] [AllowNull()] [PSTypeName("SSO.ObjectPath")] $Link = $null,
+        [Parameter(ParameterSetName="Link")] [AllowNull()] [string[]] $LinkValue = $null
+    )
+    Begin {
+        if($PSCmdlet.ParameterSetName -eq "Map") {
+            $local:parameters = Copy-Map -Map $Map -Keys "LinkName","LinkType","Link","LinkValue"
+        } else {
+            $local:parameters = Copy-Map -Map $PSBoundParameters -Keys "LinkName","LinkType","Link","LinkValue"
+        }
+        if($local:parameters.Count -gt 0) {
+            $local:mapper = { $_ | Join-LinkPath @parameters }
+        } else {
+            $local:mapper = { $_ }
+        }
+    }
+    Process {
+        $InputObject | & $local:mapper | ? { $_.PSObject.TypeNames -contains "SSO.LinkPath" }
+    }
+}
+
+<#
 .SYNOPSIS Create path to attribute name
 #>
 function Join-AttributePath {
     [CmdletBinding()]
     Param(
-        [Parameter(ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true)] [PSTypeName("Object.Path")] $Id,
+        [Parameter(ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
         [Parameter(Position=0)] [ValidatePattern("\w+")] [string] $Name
     )
     Begin {
-        #
+        Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
     }
     Process {
-        $Id | % {
-            [pscustomobject]@{
-                PSTypeName="Attribute.Path"
-                Id=$_
-                Name=$Name
-            } |
-            Add-Member -MemberType ScriptMethod -Name "ToString" -Value { ConvertFrom-AttributePath $this } -Force -PassThru 
+        $InputObject | % {
+            $local:out = New-ObjectPath -Type $_.Type -Value $_.Id
+            $local:out.PSObject.TypeNames.Insert(0, "SSO.AttributePath")
+            $local:out = $local:out | Add-Member -MemberType NoteProperty -Name "AttributeName" -Value $Name -PassThru 
+            $local:out = $local:out | Add-Member -MemberType ScriptMethod -Name "ToString" -Value { ConvertFrom-AttributePath $this } -Force -PassThru 
+            Write-Verbose "Join-AttributePath return:$($local:out)"
+            $local:out
         }
     }
 }
@@ -231,15 +303,42 @@ function Join-AttributePath {
 function ConvertFrom-AttributePath {
     [CmdletBinding()]
     Param(
-        [Parameter(ValueFromPipeline=$true,Position=0)] [PSTypeName("Attribute.Path")] $InputObject
+        [Parameter(ValueFromPipeline=$true,Position=0)] [PSTypeName("SSO.AttributePath")] $InputObject
     )
     Process {
         $InputObject | % {
-            $local:out = $_.Id.ToString()
+            $local:out = $_ | ConvertFrom-ObjectPath
             $local:out += "/`$attribute"
-            $local:out += "/$($_.Name)"
+            $local:out += "/$($_.AttributeName)"
             $local:out
         }
+    }
+}
+
+<#
+.SYNOPSIS Select SSO.AttributePath objects from input pipeline
+#>
+function Select-AttributePath {
+    [CmdletBinding()]
+    Param(
+        [Parameter(ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
+        [Parameter(Position=0,ParameterSetName="Map")] [AllowNull()] [hashtable] $Map,
+        [Parameter(ParameterSetName="Name")] [AllowNull()] [string] $Name = $null
+    )
+    Begin {
+        if($PSCmdlet.ParameterSetName -eq "Map") {
+            $local:parameters = Copy-Map -Map $Map -Keys "Name" 
+        } else {
+            $local:parameters = Copy-Map -Map $PSBoundParameters -Keys "Name" 
+        }
+        if($local:parameters.Count -gt 0) {
+            $local:mapper = { $_ | Join-AttributePath @parameters }
+        } else {
+            $local:mapper = { $_ }
+        }
+    }
+    Process {
+        $InputObject | & $local:mapper | ? { $_.PSObject.TypeNames -contains "SSO.AttributePath" }
     }
 }
 

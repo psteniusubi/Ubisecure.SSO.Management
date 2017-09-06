@@ -1,9 +1,8 @@
-Import-Module -Name "querystring" -Scope Local
 
 function ConvertTo-Link {
     [CmdletBinding()]
     Param(
-        [parameter(Mandatory=$true,ValueFromPipeline=$true)] [xml] $InputObject
+        [parameter(Position=0,ValueFromPipeline=$true)] [xml] $InputObject
     )
     Begin {
     }
@@ -11,23 +10,22 @@ function ConvertTo-Link {
         $InputObject | 
         ? { $_.object -and $_.object.type -and $_.object.id } |
         % {
-            $local:o = $_.object.id | ConvertTo-ObjectPath
-            if($local:o) {
-                $_.object.object | 
-                ? { $_.type -and $_.id -and $_.link } |
-                % {
-                    $local:out = [PSCustomObject]@{
-                        PSTypeName = "SSO.Link"
-                        Reference = (Join-LinkPath -Id $local:o -LinkName $_.link -Link (ConvertTo-ObjectPath $_.id))
-                    }
-                    if($_.enabled) { 
-                        $local:out | Add-Member -MemberType NoteProperty -Name "Enabled" -Value $_.enabled 
-                    }
-                    if($_.index) { 
-                        $local:out | Add-Member -MemberType NoteProperty -Name "Index" -Value ($_.index | ConvertTo-ObjectPath)
-                    }
-                    $local:out
+            # object id
+            $local:id = $_.object.id | ConvertTo-ObjectPath
+            # child objects
+            $_.object.object | 
+            ? { $_.type -and $_.id -and $_.link } |
+            % {
+                $local:out = $local:id | Join-LinkPath -LinkName $_.link -Link ($_.id | ConvertTo-ObjectPath)
+                $local:out.PSObject.TypeNames.Insert(0, "SSO.Link")
+                if($_.enabled) { 
+                    $local:out = $local:out | Add-Member -MemberType NoteProperty -Name "Enabled" -Value $_.enabled -PassThru
                 }
+                if($_.index) { 
+                    $local:out = $local:out | Add-Member -MemberType NoteProperty -Name "Index" -Value ($_.index | ConvertTo-ObjectPath) -PassThru
+                }
+                $local:out = $local:out | Add-Member -MemberType MemberSet -Name "PSStandardMembers" -Value (NewDefaultDisplayPropertySet "Value","Enabled","Index") -Force -PassThru 
+                $local:out
             }
         }
     }
@@ -36,21 +34,36 @@ function ConvertTo-Link {
 function Get-Link {
     [CmdletBinding()]
     Param(
-        [Parameter(Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,ParameterSetName="Reference")] [PSTypeName("Link.Path")] $Reference,
-        [Parameter(Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,ParameterSetName="Id")] [PSTypeName("Object.Path")] $Id,
-        [Parameter(ParameterSetName="Id")] [AllowNull()] [string] $LinkName = $null,
-        [Parameter(ParameterSetName="Id")] [AllowNull()] [string] $LinkType = $null,
+        [Parameter(ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
+        [Parameter()] [AllowNull()] [string] $LinkName = $null,
+        [Parameter()] [AllowNull()] [string] $LinkType = $null,
+        [Parameter()] [AllowNull()] [PSTypeName("SSO.ObjectPath")] $Link = $null,
+        [Parameter(Position=0)] [AllowNull()] [string[]] $LinkValue = $null,
         [Parameter()] [PSTypeName("Context")] $Context = (GetContext)
     )
+    Begin {
+    }
     Process {
-        switch($PSCmdlet.ParameterSetName) {
-            "Reference" { $Reference | Invoke-Api -Method Get -Context $Context | ConvertTo-Link }
-            "Id" { 
-                $local:t = @{}
-                if($LinkName) { $local:t["LinkName"] = $LinkName }
-                if($LinkType) { $local:t["LinkType"] = $LinkType }
-                $Id | Join-LinkPath @local:t | Invoke-Api -Method Get -Context $Context | ConvertTo-Link 
-            }
+        $InputObject | Select-LinkPath $PSBoundParameters | Invoke-Api -Method Get -Context $Context | ConvertTo-Link
+    }
+}
+
+<#
+.SYNOPSIS Select Link property from input pipeline
+#>
+function Select-Link {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Position=0,ValueFromPipeline=$true)] [PSTypeName("SSO.LinkPath")] $InputObject,
+        [Parameter(ParameterSetName="Id")] [switch] $Id,
+        [Parameter(ParameterSetName="Link")] [switch] $Link,
+        [Parameter(ParameterSetName="Index")] [switch] $Index
+    )
+    Process {
+        $InputObject | % {
+            if($Id) { New-ObjectPath -Type $_.Type -Value $_.Id }
+            elseif($Link) { $_.Link }
+            elseif($Index) { $_.Index }
         }
     }
 }
@@ -58,74 +71,53 @@ function Get-Link {
 function Set-Link {
     [CmdletBinding()]
     Param(
-        [Parameter(Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true)] [PSTypeName("Link.Path")] $Reference,
+        [Parameter(ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
+        [Parameter()] [AllowNull()] [string] $LinkName = $null,
+        [Parameter()] [AllowNull()] [string] $LinkType = $null,
+        [Parameter()] [AllowNull()] [PSTypeName("SSO.ObjectPath")] $Link = $null,
+        [Parameter(Position=0)] [AllowNull()] [string[]] $LinkValue = $null,
         [parameter()] [switch] $Enabled,
         [parameter()] [hashtable] $Attributes = $null,
         [Parameter()] [PSTypeName("Context")] $Context = (GetContext)
     )
     Begin {
-        $local:form = New-QueryString
-        if($Enabled) {
-            $local:form = $local:form | Add-QueryString "enabled" "true"
-        }
-        if($Attributes) {
-            $local:form = $local:form | Add-QueryString -Values $Attributes
-        }
-        $local:form = $local:form | ConvertTo-QueryString
     }
     Process {
-        $Reference | Invoke-Api -Method Put -Body $local:form -Context $Context | ConvertTo-Link
-    }
-}
-
-function Select-Link {
-    [CmdletBinding()]
-    Param(
-        [Parameter(Position=0,ValueFromPipeline=$true)] [PSTypeName("SSO.Link")] $InputObject,
-        [Parameter(ParameterSetName="Id")] [switch] $Id,
-        [Parameter(ParameterSetName="Link")] [switch] $Reference,
-        [Parameter(ParameterSetName="Index")] [switch] $Index
-    )
-    Process {
-        $InputObject | % {
-            if($Id) { $_.Reference.Id }
-            elseif($Reference) { $_.Reference.Link }
-            elseif($Index) { $_.Index }
-        }
+        $InputObject | Select-LinkPath $PSBoundParameters | Invoke-Api -Method Put -Body (ConvertTo-Form $PSBoundParameters) -Context $Context | ConvertTo-Link
     }
 }
 
 function Add-Link {
     [CmdletBinding()]
     Param(
-        [Parameter(Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true)] [PSTypeName("Link.Path")] $Reference,
+        [Parameter(ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
+        [Parameter()] [AllowNull()] [string] $LinkName = $null,
+        [Parameter()] [AllowNull()] [string] $LinkType = $null,
+        [Parameter()] [AllowNull()] [PSTypeName("SSO.ObjectPath")] $Link = $null,
+        [Parameter(Position=0)] [AllowNull()] [string[]] $LinkValue = $null,
         [parameter()] [switch] $Enabled,
         [parameter()] [hashtable] $Attributes = $null,
         [Parameter()] [PSTypeName("Context")] $Context = (GetContext)
     )
     Begin {
-        $local:form = New-QueryString
-        if($Enabled) {
-            $local:form = $local:form | Add-QueryString "enabled" "true"
-        }
-        if($Attributes) {
-            $local:form = $local:form | Add-QueryString -Values $Attributes
-        }
-        $local:form = $local:form | ConvertTo-QueryString
     }
     Process {
-        $Reference | Invoke-Api -Method Post -Body $local:form -Context $Context | ConvertTo-Link
+        $InputObject | Select-LinkPath $PSBoundParameters | Invoke-Api -Method Post -Body (ConvertTo-Form $PSBoundParameters) -Context $Context | ConvertTo-Link
     }
 }
 
 function Remove-Link {
     [CmdletBinding()]
     Param(
-        [Parameter(Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true)] [PSTypeName("Link.Path")] $Reference,
+        [Parameter(ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
+        [Parameter()] [AllowNull()] [string] $LinkName = $null,
+        [Parameter()] [AllowNull()] [string] $LinkType = $null,
+        [Parameter()] [AllowNull()] [PSTypeName("SSO.ObjectPath")] $Link = $null,
+        [Parameter(Position=0)] [AllowNull()] [string[]] $LinkValue = $null,
         [Parameter()] [PSTypeName("Context")] $Context = (GetContext)
     )
     Process {
-        $Reference | Invoke-Api -Method Delete -Context $Context 
+        $InputObject | Select-LinkPath $PSBoundParameters | Invoke-Api -Method Delete -Context $Context 
     }
 }
 

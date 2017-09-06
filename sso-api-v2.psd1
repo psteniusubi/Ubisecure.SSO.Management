@@ -10,6 +10,7 @@ FunctionsToExport = @(
     "New-ObjectPath",
     "ConvertFrom-ObjectPath",
     "ConvertTo-ObjectPath",
+
     "Join-ChildPath",
 
     "Join-LinkPath",
@@ -31,6 +32,10 @@ FunctionsToExport = @(
     "Add-Object",
     "Remove-Object",
 
+    "Get-Child",
+    "Set-Child",
+    "Remove-Child",
+
     "ConvertTo-Link",
     "Get-Link",
     "Select-Link",
@@ -50,6 +55,7 @@ NestedModules = @(
     "logon.ps1",
     "sso-path.ps1",
     "object.ps1",
+    "child.ps1",
     "link.ps1",
     "attribute.ps1",
     "sso-api.psm1"
