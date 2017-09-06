@@ -127,6 +127,21 @@ function ConvertTo-ObjectPath {
 }
 
 <#
+.SYNOPSIS Select SSO.ObjectPath objects from input pipeline
+#>
+function Select-ObjectPath {
+    [CmdletBinding()]
+    Param(
+        [Parameter(ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject
+    )
+    Begin {
+    }
+    Process {
+        $InputObject | % { New-ObjectPath -Type $_.Type -Value $_.Id } | ? { $_.PSObject.TypeNames -contains "SSO.ObjectPath" }
+    }
+}
+
+<#
 .SYNOPSIS Add child segments to Path
 #>
 function Join-ChildPath {

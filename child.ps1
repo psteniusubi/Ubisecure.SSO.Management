@@ -2,9 +2,9 @@
 function Get-Child {
     [CmdletBinding()]
     Param(
-        [Parameter(ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
+        [Parameter(ValueFromPipeline=$true,Mandatory=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
         [Parameter()] [AllowNull()] [ValidatePattern("\w+")] [string] $ChildType = $null,
-        [Parameter(Position=0)] [string[]] $ChildValue,
+        [Parameter(Position=0,Mandatory=$true)] [string[]] $ChildValue,
         [Parameter()] [PSTypeName("Context")] $Context = (GetContext)
     )
     Begin {
@@ -17,9 +17,9 @@ function Get-Child {
 function Set-Child {
     [CmdletBinding(SupportsShouldProcess=$true)]
     Param(
-        [Parameter(ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
+        [Parameter(ValueFromPipeline=$true,Mandatory=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
         [Parameter()] [AllowNull()] [ValidatePattern("\w+")] [string] $ChildType = $null,
-        [Parameter(Position=0)] [string[]] $ChildValue,
+        [Parameter(Position=0,Mandatory=$true)] [string[]] $ChildValue,
         [parameter()] [switch] $Enabled,
         [parameter()] [hashtable] $Attributes = $null,
         [Parameter()] [PSTypeName("Context")] $Context = (GetContext)
@@ -34,9 +34,9 @@ function Set-Child {
 function Remove-Child {
     [CmdletBinding(SupportsShouldProcess=$true)]
     Param(
-        [Parameter(ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
+        [Parameter(ValueFromPipeline=$true,Mandatory=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
         [Parameter()] [AllowNull()] [ValidatePattern("\w+")] [string] $ChildType = $null,
-        [Parameter(Position=0)] [string[]] $ChildValue,
+        [Parameter(Position=0,Mandatory=$true)] [string[]] $ChildValue,
         [Parameter()] [PSTypeName("Context")] $Context = (GetContext)
     )
     Begin {

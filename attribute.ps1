@@ -2,7 +2,7 @@
 function Get-Attribute {
     [CmdletBinding()]
     Param(
-        [Parameter(ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
+        [Parameter(ValueFromPipeline=$true,Mandatory=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
         [Parameter(Position=0)] [AllowNull()] [string] $Name = $null,
         [Parameter()] [PSTypeName("Context")] $Context = (GetContext)
     )
@@ -16,7 +16,7 @@ function Get-Attribute {
 function Set-Attribute {
     [CmdletBinding(SupportsShouldProcess=$true)]
     Param(
-        [Parameter(ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
+        [Parameter(ValueFromPipeline=$true,Mandatory=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
         [Parameter(Position=0)] [AllowNull()] [string] $Name = $null,
         [Parameter()] [AllowNull()] [string] $ContentType = "application/x-www-form-urlencoded",
         [Parameter()] [AllowNull()] [string] $Accept = $null,
@@ -32,7 +32,7 @@ function Set-Attribute {
 function Add-Attribute {
     [CmdletBinding(SupportsShouldProcess=$true)]
     Param(
-        [Parameter(ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
+        [Parameter(ValueFromPipeline=$true,Mandatory=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
         [Parameter(Position=0)] [AllowNull()] [string] $Name = $null,
         [Parameter()] [AllowNull()] [string] $ContentType = "application/x-www-form-urlencoded",
         [Parameter()] [AllowNull()] [string] $Accept = $null,
@@ -48,7 +48,7 @@ function Add-Attribute {
 function Remove-Attribute {
     [CmdletBinding(SupportsShouldProcess=$true)]
     Param(
-        [Parameter(ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
+        [Parameter(ValueFromPipeline=$true,Mandatory=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
         [Parameter(Position=0)] [AllowNull()] [string] $Name = $null,
         [Parameter()] [PSTypeName("Context")] $Context = (GetContext)
     )

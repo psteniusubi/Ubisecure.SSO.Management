@@ -32,13 +32,13 @@ function ConvertTo-Link {
 }
 
 function Get-Link {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName="Link")]
     Param(
-        [Parameter(ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
+        [Parameter(ValueFromPipeline=$true,Mandatory=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
         [Parameter()] [AllowNull()] [string] $LinkName = $null,
-        [Parameter()] [AllowNull()] [string] $LinkType = $null,
-        [Parameter()] [AllowNull()] [PSTypeName("SSO.ObjectPath")] $Link = $null,
-        [Parameter(Position=0)] [AllowNull()] [string[]] $LinkValue = $null,
+        [Parameter(ParameterSetName="Link",Position=0)] [AllowNull()] [PSTypeName("SSO.ObjectPath")] $Link = $null,
+        [Parameter(ParameterSetName="LinkValue",Mandatory=$true)] [string] $LinkType,
+        [Parameter(ParameterSetName="LinkValue",Position=0)] [AllowNull()] [string[]] $LinkValue = $null,
         [Parameter()] [PSTypeName("Context")] $Context = (GetContext)
     )
     Begin {
@@ -54,7 +54,7 @@ function Get-Link {
 function Select-Link {
     [CmdletBinding()]
     Param(
-        [Parameter(Position=0,ValueFromPipeline=$true)] [PSTypeName("SSO.LinkPath")] $InputObject,
+        [Parameter(Position=0,ValueFromPipeline=$true,Mandatory=$true)] [PSTypeName("SSO.LinkPath")] $InputObject,
         [Parameter(ParameterSetName="Id")] [switch] $Id,
         [Parameter(ParameterSetName="Link")] [switch] $Link,
         [Parameter(ParameterSetName="Index")] [switch] $Index
@@ -69,13 +69,13 @@ function Select-Link {
 }
 
 function Set-Link {
-    [CmdletBinding(SupportsShouldProcess=$true)]
+    [CmdletBinding(SupportsShouldProcess=$true,DefaultParameterSetName="Link")]
     Param(
-        [Parameter(ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
+        [Parameter(ValueFromPipeline=$true,Mandatory=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
         [Parameter()] [AllowNull()] [string] $LinkName = $null,
-        [Parameter()] [AllowNull()] [string] $LinkType = $null,
-        [Parameter()] [AllowNull()] [PSTypeName("SSO.ObjectPath")] $Link = $null,
-        [Parameter(Position=0)] [AllowNull()] [string[]] $LinkValue = $null,
+        [Parameter(ParameterSetName="Link",Position=0)] [AllowNull()] [PSTypeName("SSO.ObjectPath")] $Link = $null,
+        [Parameter(ParameterSetName="LinkValue",Mandatory=$true)] [string] $LinkType,
+        [Parameter(ParameterSetName="LinkValue",Position=0)] [AllowNull()] [string[]] $LinkValue = $null,
         [parameter()] [switch] $Enabled,
         [parameter()] [hashtable] $Attributes = $null,
         [Parameter()] [PSTypeName("Context")] $Context = (GetContext)
@@ -88,13 +88,13 @@ function Set-Link {
 }
 
 function Add-Link {
-    [CmdletBinding(SupportsShouldProcess=$true)]
+    [CmdletBinding(SupportsShouldProcess=$true,DefaultParameterSetName="Link")]
     Param(
-        [Parameter(ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
+        [Parameter(ValueFromPipeline=$true,Mandatory=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
         [Parameter()] [AllowNull()] [string] $LinkName = $null,
-        [Parameter()] [AllowNull()] [string] $LinkType = $null,
-        [Parameter()] [AllowNull()] [PSTypeName("SSO.ObjectPath")] $Link = $null,
-        [Parameter(Position=0)] [AllowNull()] [string[]] $LinkValue = $null,
+        [Parameter(ParameterSetName="Link",Position=0)] [AllowNull()] [PSTypeName("SSO.ObjectPath")] $Link = $null,
+        [Parameter(ParameterSetName="LinkValue",Mandatory=$true)] [string] $LinkType,
+        [Parameter(ParameterSetName="LinkValue",Position=0)] [AllowNull()] [string[]] $LinkValue = $null,
         [parameter()] [switch] $Enabled,
         [parameter()] [hashtable] $Attributes = $null,
         [Parameter()] [PSTypeName("Context")] $Context = (GetContext)
@@ -107,13 +107,13 @@ function Add-Link {
 }
 
 function Remove-Link {
-    [CmdletBinding(SupportsShouldProcess=$true)]
+    [CmdletBinding(SupportsShouldProcess=$true,DefaultParameterSetName="Link")]
     Param(
-        [Parameter(ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
+        [Parameter(ValueFromPipeline=$true,Mandatory=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
         [Parameter()] [AllowNull()] [string] $LinkName = $null,
-        [Parameter()] [AllowNull()] [string] $LinkType = $null,
-        [Parameter()] [AllowNull()] [PSTypeName("SSO.ObjectPath")] $Link = $null,
-        [Parameter(Position=0)] [AllowNull()] [string[]] $LinkValue = $null,
+        [Parameter(ParameterSetName="Link",Position=0)] [AllowNull()] [PSTypeName("SSO.ObjectPath")] $Link = $null,
+        [Parameter(ParameterSetName="LinkValue",Mandatory=$true)] [string] $LinkType,
+        [Parameter(ParameterSetName="LinkValue",Position=0)] [AllowNull()] [string[]] $LinkValue = $null,
         [Parameter()] [PSTypeName("Context")] $Context = (GetContext)
     )
     Process {

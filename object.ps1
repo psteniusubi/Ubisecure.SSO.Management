@@ -29,14 +29,14 @@ function ConvertTo-Object {
 function Get-Object {
     [CmdletBinding(DefaultParameterSetName="InputObject")]
     Param(
-        [Parameter(ParameterSetName="InputObject",Position=0,ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
-        [Parameter(ParameterSetName="TypeValue")] [ValidatePattern("\w+")] [string] $Type,
+        [Parameter(ParameterSetName="InputObject",Position=0,ValueFromPipeline=$true,Mandatory=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
+        [Parameter(ParameterSetName="TypeValue",Mandatory=$true)] [ValidatePattern("\w+")] [string] $Type,
         [Parameter(ParameterSetName="TypeValue",Position=0,ValueFromPipeline=$true)] [AllowNull()] [string[]] $Value,
         [Parameter()] [PSTypeName("Context")] $Context = (GetContext)
     )
     Begin {
         if($PSCmdlet.ParameterSetName -eq "InputObject") {
-            $local:x = { $InputObject }
+            $local:x = { $InputObject | Select-ObjectPath }
         } else {
             $local:x = { New-ObjectPath -Type $Type -Value $Value }
         }
@@ -49,8 +49,8 @@ function Get-Object {
 function Set-Object {
     [CmdletBinding(SupportsShouldProcess=$true,DefaultParameterSetName="InputObject")]
     Param(
-        [Parameter(ParameterSetName="InputObject",Position=0,ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
-        [Parameter(ParameterSetName="TypeValue")] [ValidatePattern("\w+")] [string] $Type,
+        [Parameter(ParameterSetName="InputObject",Position=0,ValueFromPipeline=$true,Mandatory=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
+        [Parameter(ParameterSetName="TypeValue",Mandatory=$true)] [ValidatePattern("\w+")] [string] $Type,
         [Parameter(ParameterSetName="TypeValue",Position=0,ValueFromPipeline=$true)] [AllowNull()] [string[]] $Value,
         [parameter()] [switch] $Enabled,
         [parameter()] [hashtable] $Attributes = $null,
@@ -58,7 +58,7 @@ function Set-Object {
     )
     Begin {
         if($PSCmdlet.ParameterSetName -eq "InputObject") {
-            $local:x = { $InputObject }
+            $local:x = { $InputObject | Select-ObjectPath }
         } else {
             $local:x = { New-ObjectPath -Type $Type -Value $Value }
         }
@@ -71,8 +71,8 @@ function Set-Object {
 function Add-Object {
     [CmdletBinding(SupportsShouldProcess=$true,DefaultParameterSetName="InputObject")]
     Param(
-        [Parameter(ParameterSetName="InputObject",Position=0,ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
-        [Parameter(ParameterSetName="TypeValue")] [ValidatePattern("\w+")] [string] $Type,
+        [Parameter(ParameterSetName="InputObject",Position=0,ValueFromPipeline=$true,Mandatory=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
+        [Parameter(ParameterSetName="TypeValue",Mandatory=$true)] [ValidatePattern("\w+")] [string] $Type,
         [Parameter(ParameterSetName="TypeValue",Position=0,ValueFromPipeline=$true)] [AllowNull()] [string[]] $Value,
         [parameter()] [switch] $Enabled,
         [parameter()] [AllowNull()] [string] $ChildType = $null,
@@ -82,7 +82,7 @@ function Add-Object {
     )
     Begin {
         if($PSCmdlet.ParameterSetName -eq "InputObject") {
-            $local:x = { $InputObject }
+            $local:x = { $InputObject | Select-ObjectPath }
         } else {
             $local:x = { New-ObjectPath -Type $Type -Value $Value }
         }
@@ -95,14 +95,14 @@ function Add-Object {
 function Remove-Object {
     [CmdletBinding(SupportsShouldProcess=$true,DefaultParameterSetName="InputObject")]
     Param(
-        [Parameter(ParameterSetName="InputObject",Position=0,ValueFromPipeline=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
-        [Parameter(ParameterSetName="TypeValue")] [ValidatePattern("\w+")] [string] $Type,
+        [Parameter(ParameterSetName="InputObject",Position=0,ValueFromPipeline=$true,Mandatory=$true)] [PSTypeName("SSO.ObjectPath")] $InputObject,
+        [Parameter(ParameterSetName="TypeValue",Mandatory=$true)] [ValidatePattern("\w+")] [string] $Type,
         [Parameter(ParameterSetName="TypeValue",Position=0,ValueFromPipeline=$true)] [AllowNull()] [string[]] $Value,
         [Parameter()] [PSTypeName("Context")] $Context = (GetContext)
     )
     Begin {
         if($PSCmdlet.ParameterSetName -eq "InputObject") {
-            $local:x = { $InputObject }
+            $local:x = { $InputObject | Select-ObjectPath }
         } else {
             $local:x = { New-ObjectPath -Type $Type -Value $Value }
         }
