@@ -31,7 +31,8 @@ function GetContext {
     }
     Process {
         if(-not $script:Context.ContainsKey($Name)) {
-            throw "Context is not defined"
+            Write-Error "SSO API Logon Context is not defined"
+            return
         }
         $script:Context[$Name]
     }
