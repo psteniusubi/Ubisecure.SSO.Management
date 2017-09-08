@@ -94,7 +94,7 @@ function Invoke-Api {
             }
             Write-Verbose "$Method $($local:u) Content-Type:$ContentType Body:$Body" 
             if(($Method -eq "Get") -or $PSCmdlet.ShouldProcess($local:u, $Method)) {
-                Invoke-RestMethod -Method $Method -Uri $local:u -ContentType $ContentType -Headers $local:h -Body $Body
+                Invoke-RestMethod -Method $Method -Uri $local:u -ContentType $ContentType -Headers $local:h -Body $Body -UseBasicParsing
             }
         }
     }
