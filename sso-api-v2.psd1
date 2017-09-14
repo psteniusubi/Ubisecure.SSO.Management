@@ -62,6 +62,7 @@ NestedModules = @(
     "link.ps1",
     "attribute.ps1",
     "sso-api.psm1",
+    "../oauth2/oauth2.psd1"
     "../oauth2/querystring/querystring.psd1"
 )
 }
