@@ -1,5 +1,3 @@
-Import-Module -Name "querystring" -Scope Local
-Import-Module -Name "oauth2" -Scope Local
 
 function ConvertTo-Form {
     [CmdletBinding()]

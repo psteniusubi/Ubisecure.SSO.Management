@@ -6,6 +6,7 @@
 RootModule = 'sso-api.psm1'
 ModuleVersion = '1.0'
 GUID = '34f38943-e532-4977-b814-8e60a453160c'
+DefaultCommandPrefix = 'SSO'
 FunctionsToExport = @(
     "New-ObjectPath",
     "ConvertFrom-ObjectPath",
@@ -48,7 +49,9 @@ FunctionsToExport = @(
     "Add-Attribute",
     "Remove-Attribute"
 )
-DefaultCommandPrefix = 'SSO'
+CmdletsToExport = @()
+VariablesToExport = @()
+AliasesToExport = @()
 NestedModules = @(
     "Get-CallerPreference.ps1",
     "context.ps1",
@@ -58,10 +61,7 @@ NestedModules = @(
     "child.ps1",
     "link.ps1",
     "attribute.ps1",
-    "sso-api.psm1"
-)
-RequiredModules = @(
-    #@{ModuleName=”oauth2”;RequiredVersion="1.0"},
-    #@{ModuleName=”querystring”;RequiredVersion="1.0"}
+    "sso-api.psm1",
+    "../oauth2/querystring/querystring.psd1"
 )
 }
