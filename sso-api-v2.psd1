@@ -53,6 +53,7 @@ CmdletsToExport = @()
 VariablesToExport = @()
 AliasesToExport = @()
 NestedModules = @(
+    "oauth2",
     "Get-CallerPreference.ps1",
     "context.ps1",
     "logon.ps1",
@@ -61,8 +62,6 @@ NestedModules = @(
     "child.ps1",
     "link.ps1",
     "attribute.ps1",
-    "sso-api.psm1",
-    "../oauth2/oauth2.psd1"
-    "../oauth2/querystring/querystring.psd1"
+    "sso-api.psm1"
 )
 }
