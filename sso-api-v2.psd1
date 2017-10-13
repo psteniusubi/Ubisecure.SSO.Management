@@ -53,7 +53,7 @@ CmdletsToExport = @()
 VariablesToExport = @()
 AliasesToExport = @()
 RequiredModules = @(
-    @{"ModuleName"=”oauth2”;"RequiredVersion"="1.0"}
+    @{"ModuleName"="oauth2";"RequiredVersion"="1.0"}
 )
 NestedModules = @(
     "Get-CallerPreference.ps1",
