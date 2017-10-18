@@ -20,6 +20,7 @@ function New-Logon {
         [pscredential] $Credential = $null,
 
         [parameter(ParameterSetName="EmbeddedBrowser")] 
+        [Alias("Code")]
         [switch] 
         $EmbeddedBrowser,
 
