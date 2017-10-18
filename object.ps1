@@ -15,9 +15,13 @@ function ConvertTo-Object {
             $local:a = @{}
             $_.object.attribute | ? { $_.name } | 
             % {
-                $local:v = @()
-                $_.value | % { $local:v += $_ }
-                $local:a[$_.name] = $local:v
+                if($_.HasAttribute("value")) {
+                    $local:a[$_.name] = $_.value
+                } else {
+                    $local:v = @()
+                    $_.value | % { $local:v += $_ }
+                    $local:a[$_.name] = $local:v
+                }
             }
             $local:out = $local:out | Add-Member -MemberType NoteProperty -Name "Attributes" -Value $local:a -PassThru 
             $local:out = $local:out | Add-Member -MemberType MemberSet -Name "PSStandardMembers" -Value (NewDefaultDisplayPropertySet "Value","Attributes") -Force -PassThru 
