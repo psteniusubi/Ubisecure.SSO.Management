@@ -83,6 +83,9 @@ function Invoke-Api {
         if($Query -and ($Query.Count -gt 0)) {
             $local:q = New-QueryString | Add-QueryString -Values $Query | ConvertTo-QueryString
         }
+        if($Body -is [string]) {
+            $Body = [System.Text.Encoding]::UTF8.GetBytes($Body)
+        }
     }
     Process {
         $InputObject | % { "$($Context.BaseUri)$($_.ToString())" } | % {
