@@ -15,9 +15,13 @@ function New-Logon {
         [uri] 
         $ManageUri = $Uri,
         
-        [parameter(ParameterSetName="Password")] 
-        [AllowNull()] 
-        [pscredential] $Credential = $null,
+        [parameter(ParameterSetName="Credential")] 
+        [pscredential] 
+        $Credential,
+
+        [parameter(ParameterSetName="RefreshToken")] 
+        [System.Net.NetworkCredential] 
+        $RefreshToken,
 
         [parameter(ParameterSetName="EmbeddedBrowser")] 
         [Alias("Code")]
@@ -32,9 +36,17 @@ function New-Logon {
         [switch] 
         $Private,
 
-        [parameter()] 
+        [parameter(ParameterSetName="Password")] 
+        [parameter(ParameterSetName="EmbeddedBrowser")] 
+        [parameter(ParameterSetName="Browser")] 
         [allownull()] 
-        [string] $Username
+        [string] $UserName,
+
+        [parameter(ParameterSetName="RefreshToken")] 
+        [parameter(ParameterSetName="EmbeddedBrowser")] 
+        [parameter(ParameterSetName="Browser")] 
+        [ref] 
+        $RefreshTokenOut
     )
     Begin {
         Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
@@ -46,22 +58,28 @@ function New-Logon {
             "Client"=$Client
         }
         switch($PSCmdlet.ParameterSetName) {
-            "Password" {
-                if(-not $Credential) {
-                    $Credential = Get-Credential -Message $Uri -UserName $Username
-                }
+            "Credential" {
                 $local:bearer = Get-OAuthAccessToken @splat -Scope $local:scope -Credential $Credential
             }
+            "RefreshToken" {
+                $local:bearer = Get-OAuthAccessToken @splat -Scope $local:scope -RefreshToken $RefreshToken
+            }
+            "Password" {
+                $local:Credential = Get-Credential -Message $Uri -UserName $UserName
+                if($local:Credential) {
+                    $local:bearer = Get-OAuthAccessToken @splat -Scope $local:scope -Credential $local:Credential
+                }
+            }
             "EmbeddedBrowser" {
-                $local:code = Get-OAuthAuthorizationCode @splat -Scope $local:scope -Username $Username -EmbeddedBrowser
+                $local:code = Get-OAuthAuthorizationCode @splat -Scope $local:scope -Username $UserName -EmbeddedBrowser
                 if($local:code) {
-                    $local:bearer = Get-OAuthAccessToken @splat -Code $local:code
+                    $local:bearer = Get-OAuthAccessToken @splat -Code $local:code -RefreshTokenOut $RefreshTokenOut
                 }
             }
             "Browser" {
-                $local:code = Get-OAuthAuthorizationCode @splat -Scope $local:scope -Username $Username -Browser $Browser -Private:$Private
+                $local:code = Get-OAuthAuthorizationCode @splat -Scope $local:scope -Username $UserName -Browser $Browser -Private:$Private
                 if($local:code) {
-                    $local:bearer = Get-OAuthAccessToken @splat -Code $local:code
+                    $local:bearer = Get-OAuthAccessToken @splat -Code $local:code -RefreshTokenOut $RefreshTokenOut
                 }
             }
         }
