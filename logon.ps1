@@ -57,12 +57,16 @@ function New-Logon {
             "Authority"=[uri]::new($Uri, "/uas")
             "Client"=$Client
         }
+        $tokenOut = @{}
+        if($RefreshTokenOut) {
+            $tokenOut = @{"RefreshTokenOut"=$RefreshTokenOut}
+        }
         switch($PSCmdlet.ParameterSetName) {
             "Credential" {
                 $local:bearer = Get-OAuthAccessToken @splat -Scope $local:scope -Credential $Credential
             }
             "RefreshToken" {
-                $local:bearer = Get-OAuthAccessToken @splat -Scope $local:scope -RefreshToken $RefreshToken
+                $local:bearer = Get-OAuthAccessToken @splat -Scope $local:scope -RefreshToken $RefreshToken @tokenOut
             }
             "Password" {
                 $local:Credential = Get-Credential -Message $Uri -UserName $UserName
@@ -73,13 +77,13 @@ function New-Logon {
             "EmbeddedBrowser" {
                 $local:code = Get-OAuthAuthorizationCode @splat -Scope $local:scope -Username $UserName -EmbeddedBrowser
                 if($local:code) {
-                    $local:bearer = Get-OAuthAccessToken @splat -Code $local:code -RefreshTokenOut $RefreshTokenOut
+                    $local:bearer = Get-OAuthAccessToken @splat -Code $local:code @tokenOut
                 }
             }
             "Browser" {
                 $local:code = Get-OAuthAuthorizationCode @splat -Scope $local:scope -Username $UserName -Browser $Browser -Private:$Private
                 if($local:code) {
-                    $local:bearer = Get-OAuthAccessToken @splat -Code $local:code -RefreshTokenOut $RefreshTokenOut
+                    $local:bearer = Get-OAuthAccessToken @splat -Code $local:code @tokenOut
                 }
             }
         }
