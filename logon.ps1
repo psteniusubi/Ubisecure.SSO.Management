@@ -36,6 +36,11 @@ function New-Logon {
         [switch] 
         $Private,
 
+        [parameter(ParameterSetName="Browser")] 
+        [parameter(ParameterSetName="EmbeddedBrowser")] 
+        [switch] 
+        $ForceAuthn = $true,
+
         [parameter(ParameterSetName="Password")] 
         [parameter(ParameterSetName="EmbeddedBrowser")] 
         [parameter(ParameterSetName="Browser")] 
@@ -75,13 +80,13 @@ function New-Logon {
                 }
             }
             "EmbeddedBrowser" {
-                $local:code = Get-OAuthAuthorizationCode @splat -Scope $local:scope -Username $UserName -EmbeddedBrowser
+                $local:code = Get-OAuthAuthorizationCode @splat -Scope $local:scope -Username $UserName -EmbeddedBrowser -ForceAuthn:$ForceAuthn
                 if($local:code) {
                     $local:bearer = Get-OAuthAccessToken @splat -Code $local:code @tokenOut
                 }
             }
             "Browser" {
-                $local:code = Get-OAuthAuthorizationCode @splat -Scope $local:scope -Username $UserName -Browser $Browser -Private:$Private
+                $local:code = Get-OAuthAuthorizationCode @splat -Scope $local:scope -Username $UserName -Browser $Browser -ForceAuthn:$ForceAuthn -Private:$Private
                 if($local:code) {
                     $local:bearer = Get-OAuthAccessToken @splat -Code $local:code @tokenOut
                 }
