@@ -1,4 +1,4 @@
-﻿Import-Module "sso-api-v2" -Force -Prefix ""
+﻿Import-Module "Ubisecure.SSO.Management" -Force -Prefix ""
 
 New-SSOObjectPath -Type "site" 
 New-SSOObjectPath -Type "site" -Value "System" 

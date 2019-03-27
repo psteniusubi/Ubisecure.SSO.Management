@@ -1,6 +1,4 @@
-﻿Import-Module "oauth2" 
-Import-Module "sso-api-v2" -Force
-
+﻿
 $cred = [System.Net.NetworkCredential]::new("system", "admin")
 $cred = [pscredential]::new($cred.UserName, $cred.SecurePassword)
 

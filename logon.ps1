@@ -1,5 +1,4 @@
-﻿Import-Module "oauth2" -Scope Local
-
+﻿
 function New-Logon {
     [CmdletBinding(DefaultParameterSetName="Password")]
     param(

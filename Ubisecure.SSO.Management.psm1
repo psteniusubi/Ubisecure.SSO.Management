@@ -1,4 +1,3 @@
-Import-Module (Get-OAuthModulePath "querystring/querystring.psd1") -Scope Local
 
 function ConvertTo-Form {
     [CmdletBinding()]

@@ -1,11 +1,13 @@
 #
-# Module manifest for module 'sso-api-v2'
+# Module manifest for module 'Ubisecure.SSO.Management'
 #
 
 @{
-RootModule = 'sso-api.psm1'
-ModuleVersion = '1.0'
+RootModule = 'Ubisecure.SSO.Management.psm1'
+ModuleVersion = '1.0.0'
 GUID = '34f38943-e532-4977-b814-8e60a453160c'
+Author = 'petteri.stenius@ubisecure.com'
+Description = 'Ubisecure SSO Management'
 DefaultCommandPrefix = 'SSO'
 FunctionsToExport = @(
     "New-ObjectPath",
@@ -53,7 +55,7 @@ CmdletsToExport = @()
 VariablesToExport = @()
 AliasesToExport = @()
 RequiredModules = @(
-    @{"ModuleName"="oauth2";"RequiredVersion"="1.0"}
+    @{"ModuleName"="Ubisecure.OAuth2";"ModuleVersion"="1.0.0";"Guid"="96e72ae8-79d7-4728-a0e0-6f4b28409460"}
 )
 NestedModules = @(
     "Get-CallerPreference.ps1",
@@ -64,6 +66,6 @@ NestedModules = @(
     "child.ps1",
     "link.ps1",
     "attribute.ps1",
-    "sso-api.psm1"
+    "Ubisecure.SSO.Management.psm1"
 )
 }
