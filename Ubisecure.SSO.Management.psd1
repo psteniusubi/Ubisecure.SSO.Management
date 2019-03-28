@@ -7,7 +7,7 @@ RootModule = 'Ubisecure.SSO.Management.psm1'
 ModuleVersion = '1.0.0'
 GUID = '34f38943-e532-4977-b814-8e60a453160c'
 Author = 'petteri.stenius@ubisecure.com'
-Description = 'Ubisecure SSO Management'
+Description = 'PowerShell bindings for Ubisecure SSO Management API'
 DefaultCommandPrefix = 'SSO'
 FunctionsToExport = @(
     "New-ObjectPath",
