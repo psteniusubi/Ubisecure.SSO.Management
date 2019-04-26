@@ -1,14 +1,16 @@
 #
-# Module manifest for module 'Ubisecure.SSO.Management'
+# Module manifest for module "Ubisecure.SSO.Management"
 #
 
 @{
-RootModule = 'Ubisecure.SSO.Management.psm1'
-ModuleVersion = '1.0.0'
-GUID = '34f38943-e532-4977-b814-8e60a453160c'
-Author = 'petteri.stenius@ubisecure.com'
-Description = 'PowerShell bindings for Ubisecure SSO Management API'
-DefaultCommandPrefix = 'SSO'
+RootModule = "Ubisecure.SSO.Management.psm1"
+ModuleVersion = "1.0.0"
+GUID = "34f38943-e532-4977-b814-8e60a453160c"
+Author = "petteri.stenius@ubisecure.com"
+Description = "PowerShell bindings for Ubisecure SSO Management API"
+PowerShellVersion = "5.1"
+CompatiblePSEditions = "Desktop","Core"
+DefaultCommandPrefix = "SSO"
 FunctionsToExport = @(
     "New-ObjectPath",
     "ConvertFrom-ObjectPath",
