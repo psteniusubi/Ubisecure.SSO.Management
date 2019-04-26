@@ -2,10 +2,39 @@
 
 Depends on [Ubisecure.OAuth2](../../../Ubisecure.OAuth2)
 
+## Install from github.com
+
+Windows
+
+```cmd
+cd /d %USERPROFILE%\Documents\WindowsPowerShell\Modules
+git clone --recurse-submodules https://github.com/psteniusubi/Ubisecure.SSO.Management.git
+```
+
+Linux
+
+```bash
+cd ~/.local/share/powershell/Modules
+git clone --recurse-submodules https://github.com/psteniusubi/Ubisecure.SSO.Management.git
+```
+
 ## Example
 
 ```powershell
-New-OAuthClientConfig -Name "example.ubidemo.com.json" | New-SSOLogon -Uri "https://login.example.ubidemo.com" -ManageUri "https://manage.example.ubidemo.com" -Browser "default"
+$client = New-OAuthClientConfig -Json @"
+{
+    "redirect_uris":  [
+                          "http://localhost/public"
+                      ],
+    "grant_types":  [
+                        "authorization_code"
+                    ],
+    "client_id":  "public",
+    "client_secret":  "public"
+}
+"@
+
+New-SSOLogon -Client $client -Uri "https://login.example.ubidemo.com" -ManageUri "https://manage.example.ubidemo.com" -Browser "default"
 
 Get-SSOObject -Type "site" "System"
 ```
