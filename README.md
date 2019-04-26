@@ -1,6 +1,6 @@
 # PowerShell bindings for Ubisecure SSO Management API
 
-Depends on [Ubisecure.OAuth2](../../../Ubisecure.OAuth2)
+Depends on [Ubisecure.OAuth2](../../../Ubisecure.OAuth2), [Ubisecure.QueryString](../../../Ubisecure.QueryString)
 
 ## Install from github.com
 
