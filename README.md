@@ -4,14 +4,16 @@ Depends on [Ubisecure.OAuth2](../../../Ubisecure.OAuth2), [Ubisecure.QueryString
 
 ## Install from github.com
 
-Windows
+### Windows
 
 ```cmd
 cd /d %USERPROFILE%\Documents\WindowsPowerShell\Modules
 git clone https://github.com/psteniusubi/Ubisecure.SSO.Management.git
 ```
 
-Linux
+Note! With PowerShell Core module path is `%USERPROFILE%\Documents\PowerShell\Modules`
+
+### Linux
 
 ```bash
 cd ~/.local/share/powershell/Modules
