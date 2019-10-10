@@ -4,7 +4,7 @@
 
 @{
 RootModule = "Ubisecure.SSO.Management.psm1"
-ModuleVersion = "1.0.0"
+ModuleVersion = "1.1.0"
 GUID = "34f38943-e532-4977-b814-8e60a453160c"
 Author = "petteri.stenius@ubisecure.com"
 Description = "PowerShell bindings for Ubisecure SSO Management API"
@@ -57,7 +57,8 @@ CmdletsToExport = @()
 VariablesToExport = @()
 AliasesToExport = @()
 RequiredModules = @(
-    @{"ModuleName"="Ubisecure.OAuth2";"ModuleVersion"="1.0.0";"Guid"="96e72ae8-79d7-4728-a0e0-6f4b28409460"}
+    @{"ModuleName"="Ubisecure.QueryString";"ModuleVersion"="1.3.0";"Guid"="80f2f884-f2e3-457f-b7c2-16e884ce9ba2"}
+    @{"ModuleName"="Ubisecure.OAuth2";"ModuleVersion"="1.1.0";"Guid"="96e72ae8-79d7-4728-a0e0-6f4b28409460"}
 )
 NestedModules = @(
     "Get-CallerPreference.ps1",
